@@ -1,9 +1,12 @@
 package com.milabuda.redditconnector.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record Post(
         Object approvedAtUtc,
         String subreddit,
@@ -15,7 +18,7 @@ public record Post(
         Integer gilded,
         boolean clicked,
         String title,
-        List<LinkFlair> linkFlairRichText,
+        List<LinkFlair> linkFlairRichtext,
         String subredditNamePrefixed,
         boolean hidden,
         Integer pwls,
@@ -63,6 +66,7 @@ public record Post(
         String authorFlairType,
         int subredditSubscribers,
         boolean isRobotIndexable,
+        boolean isOriginalContent,
         String permalink,
         int numComments,
         String url,

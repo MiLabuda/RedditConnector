@@ -90,12 +90,7 @@ public class RedditSourceTask extends SourceTask {
   }
 
   List<SourceRecord> getRedditPostsAsSourceRecords(RedditToken token) {
-    log.info("RedditSourceTask: " + token.accessToken());
-    log.info("RedditSourceTask: " + token.expireAt().toString());
-
     PostManager postManager = new PostManager(config, token);
-    log.info("RedditSourceTask: " + token.accessToken());
-    log.info("RedditSourceTask: " + token.expireAt().toString());
 
     Listing<Post> postsResponse = postManager.getPosts(token);
 
