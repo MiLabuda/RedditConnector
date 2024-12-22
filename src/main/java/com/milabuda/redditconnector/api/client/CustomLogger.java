@@ -32,20 +32,7 @@ public class CustomLogger extends Logger {
                 log.info("{}: {}", field, value);
             }
         }
-
-        // Logging response body
-        int bodyLength = 0;
-        if (response.body() != null) {
-            byte[] bodyData = Util.toByteArray(response.body().asInputStream());
-            bodyLength = bodyData.length;
-            if (bodyLength > 0) {
-                String body = Util.decodeOrDefault(bodyData, Util.UTF_8, "Binary data");
-                log.info("Body: {}", body);
-            }
-            log.info("<--- END HTTP ({}-byte body)", bodyLength);
-            return response.toBuilder().body(bodyData).build();
-        }
-        log.info("<--- END HTTP ({}-byte body)", bodyLength);
+        log.info("<--- END HTTP ({}-byte body)", response.body().length());
 
         return response;
     }
