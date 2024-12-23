@@ -31,7 +31,7 @@ public class PostSchema {
             .field(SUBREDDIT_FIELD, Schema.STRING_SCHEMA)
             .field(SCORE_FIELD, Schema.INT32_SCHEMA)
             .field(NUM_COMMENTS_FIELD, Schema.INT32_SCHEMA)
-            .field(CREATED_AT_FIELD, Timestamp.SCHEMA)
-            .field(UPVOTE_RATIO_FIELD, Schema.FLOAT32_SCHEMA)
+            .field(CREATED_AT_FIELD, Schema.INT64_SCHEMA)
+            .field(UPVOTE_RATIO_FIELD, Schema.FLOAT64_SCHEMA)
             .build();
 }

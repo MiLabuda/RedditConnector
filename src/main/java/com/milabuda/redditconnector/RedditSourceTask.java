@@ -114,7 +114,7 @@ public class RedditSourceTask extends SourceTask {
             buildRecordKey(post),
             PostSchema.VALUE_SCHEMA,
             buildRecordValue(post),
-            post.data().createdAt().toInstant().toEpochMilli());
+            post.data().createdUtc());
   }
 
     private Struct buildRecordKey(Envelope<Post> post) {
@@ -130,7 +130,7 @@ public class RedditSourceTask extends SourceTask {
                 .put(SUBREDDIT_FIELD, post.data().subreddit())
                 .put(SCORE_FIELD, post.data().score())
                 .put(NUM_COMMENTS_FIELD, post.data().numComments())
-                .put(CREATED_AT_FIELD, post.data().createdAt())
+                .put(CREATED_AT_FIELD, post.data().createdUtc())
                 .put(UPVOTE_RATIO_FIELD, post.data().upvoteRatio());
     }
 
