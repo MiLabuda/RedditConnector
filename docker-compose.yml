@@ -104,6 +104,9 @@ services:
       - ./offsets:/kafka-connect-source-reddit/offsets
       - ./logs:/kafka-connect-source-reddit/logs
       - ./src/main/resources/connect-log4j.properties:/etc/kafka-connect/connect-log4j.properties
+    ports:
+      - "5005:5005"
+      - "8083:8083"
     depends_on:
       - kafka1
       - kafka2
