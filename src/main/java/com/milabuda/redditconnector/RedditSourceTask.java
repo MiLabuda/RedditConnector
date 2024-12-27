@@ -44,6 +44,7 @@ public class RedditSourceTask extends SourceTask {
   private RedditSourceConfig config;
   private AuthManager authManager;
   private String nextPostAfter;
+  private final Map<String, Long> postsMap = new HashMap<>();
 
 
   @Override
@@ -100,7 +101,11 @@ public class RedditSourceTask extends SourceTask {
       return Collections.emptyList();
     }
 
-    return postsResponse.children().stream()
+    return postsResponse
+            .children()
+            .stream()
+            .filter(post -> !postsMap.containsKey(post.data().id()))
+            .peek(post -> postsMap.put(post.data().id(), post.data().createdUtc()))
             .map(this::generatePostSourceRecord)
             .toList();
   }
