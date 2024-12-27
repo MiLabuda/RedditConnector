@@ -13,6 +13,7 @@ import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public class RedditSourceTask extends SourceTask {
             buildRecordKey(post),
             PostSchema.VALUE_SCHEMA,
             buildRecordValue(post),
-            post.data().createdUtc());
+            Instant.ofEpochSecond(post.data().createdUtc()).toEpochMilli());
   }
 
     private Struct buildRecordKey(Envelope<Post> post) {
