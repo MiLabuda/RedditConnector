@@ -7,7 +7,7 @@ mvn clean package
 docker build . -t my-reddit-connector:1.0
 
 # Stop and remove existing Docker containers
-docker-compose down
+docker compose down
 
 # Build and start the Docker containers
-docker-compose up --build -d
+docker compose up --build -d
