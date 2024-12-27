@@ -5,6 +5,7 @@ USER root
 
 WORKDIR /kafka-connect-source-reddit
 COPY config config
+COPY kafka-data/offsets offsets
 COPY target target
 
 ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"

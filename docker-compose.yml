@@ -19,7 +19,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_LOG_DIRS: '/kafka-connect-source-reddit/data'
+    volumes:
+      - ./kafka-data/kafka1:/kafka-connect-source-reddit/data
 
   kafka2:
     image: confluentinc/cp-kafka
@@ -40,9 +42,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-    depends_on:
-      - kafka1
+      KAFKA_LOG_DIRS: '/kafka-connect-source-reddit/data'
+    volumes:
+      - ./kafka-data/kafka2:/kafka-connect-source-reddit/data
 
   kafka3:
     image: confluentinc/cp-kafka
@@ -63,9 +65,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-    depends_on:
-      - kafka1
+      KAFKA_LOG_DIRS: '/kafka-connect-source-reddit/data'
+    volumes:
+      - ./kafka-data/kafka3:/kafka-connect-source-reddit/data
 
   schema-registry:
     image: confluentinc/cp-schema-registry
@@ -101,8 +103,8 @@ services:
     image: my-reddit-connector:1.0
     volumes:
       - ./config:/kafka-connect-source-reddit/config
-      - ./offsets:/kafka-connect-source-reddit/offsets
-      - ./logs:/kafka-connect-source-reddit/logs
+      - ./kafka-data/offsets:/kafka-connect-source-reddit/offsets
+      - ./kafka-data/logs:/kafka-connect-source-reddit/logs
       - ./src/main/resources/connect-log4j.properties:/etc/kafka-connect/connect-log4j.properties
     ports:
       - "5005:5005"
