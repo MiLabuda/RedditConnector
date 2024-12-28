@@ -6,14 +6,16 @@ import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.model.PostSchema;
+import com.milabuda.redditconnector.redis.RedisManager;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,6 @@ public class RedditSourceTask extends SourceTask {
   private AuthManager authManager;
   private String nextPostAfter;
   private boolean initialFullScanDone = false;
-  private final Map<String, Long> postsMap = new HashMap<>();
-
 
   @Override
   public String version() {
@@ -57,7 +57,7 @@ public class RedditSourceTask extends SourceTask {
   }
 
   private void initializeLastVariables() {
-    Map<String, Object> lastSourceOffset = null;
+    Map<String, Object> lastSourceOffset;
     lastSourceOffset = context.offsetStorageReader().offset(sourcePartition());
     if(lastSourceOffset == null){
       log.debug("Offset storage reader is not available, using default value: {}", DEFAULT_FROM);
@@ -80,6 +80,7 @@ public class RedditSourceTask extends SourceTask {
 
   @Override
   public void stop() {
+    RedisManager.closePool();
     //TODO: Do whatever is required to stop your task.
   }
 
@@ -87,23 +88,30 @@ public class RedditSourceTask extends SourceTask {
     PostManager postManager = new PostManager(config, authManager);
     Listing<Post> postsResponse = retrievePosts(postManager);
 
-    if (postsResponse == null) {
-      log.info("No posts found. Returning empty list.");
-      return Collections.emptyList();
+    try (Jedis jedis = RedisManager.getJedisResource()) {
+      return postsResponse
+              .children()
+              .stream()
+              .sorted(Comparator.comparing(e -> e.data().createdUtc()))
+              .filter(post -> !jedis.sismember("posts:stored", post.data().id()))
+              .peek(post -> jedis.sadd("posts:stored", post.data().id()))
+              .map(this::generatePostSourceRecord)
+              .toList();
     }
-
-    return postsResponse
-            .children()
-            .stream()
-            .filter(post -> !postsMap.containsKey(post.data().id()))
-            .peek(post -> postsMap.put(post.data().id(), post.data().createdUtc()))
-            .map(this::generatePostSourceRecord)
-            .toList();
   }
 
   private Listing<Post> retrievePosts(PostManager postManager) {
     boolean eligibleForFullScan = !initialFullScanDone && config.getInitialFullScan();
-    return eligibleForFullScan ? performInitialFullScan(postManager) : postManager.getPosts();
+    Listing<Post> postsResponse =
+            eligibleForFullScan
+                    ? performInitialFullScan(postManager)
+                    : postManager.getPosts();
+
+    if (postsResponse == null) {
+      log.info("No posts found. Returning empty list.");
+      return Listing.empty();
+    }
+    return postsResponse;
   }
 
   private Listing<Post> performInitialFullScan(PostManager postManager) {
@@ -114,12 +122,14 @@ public class RedditSourceTask extends SourceTask {
 
     while (true) {
       Listing<Post> pageRecords = fetchPaginatedRecords(postManager, after, count);
+
+      postsResponse = postsResponse.addAll(pageRecords.children());
       if (pageRecords.after() == null) {
         break;
       }
-      postsResponse = postsResponse.addAll(pageRecords.children());
       after = pageRecords.after();
       count += pageRecords.children().size();
+
     }
     initialFullScanDone = true;
     return postsResponse;

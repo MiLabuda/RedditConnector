@@ -113,3 +113,12 @@ services:
       - kafka1
       - kafka2
       - kafka3
+
+  redis:
+    image: redis:8.0-M02
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    restart: unless-stopped
