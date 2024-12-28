@@ -1,9 +1,9 @@
-package com.milabuda.redditconnector.api.client;
+package com.milabuda.redditconnector.api.oauth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.api.model.RedditToken;
+import com.milabuda.redditconnector.api.client.CustomLogger;
 import feign.Feign;
 import feign.FeignException;
 import feign.Logger.Level;
@@ -19,60 +19,45 @@ public class AuthManager {
 
     private static final Logger log = LoggerFactory.getLogger(AuthManager.class);
 
-    private static final String GRANT_TYPE = "client_credentials";
-
-    private final AuthClient redditOAuth;
+    private final AuthClient httpClient;
     private final RedditSourceConfig config;
-
-    private RedditToken token;
+    private final TokenStore tokenStore;
 
     public AuthManager(RedditSourceConfig config) {
         this.config = config;
-        this.redditOAuth = redditOAuthClient();
+        this.tokenStore = new InMemoryTokenStore();
+        this.httpClient = createOAuthHttpClient();
     }
 
-    public RedditToken getRedditToken() {
-        if (isTokenValid()) {
+    public OAuthData getRedditToken() {
+        OAuthData fetchedToken = tokenStore.fetchLatest();
+        if (fetchedToken != null) {
             log.debug("Returning existing valid token.");
-            return token;
+            return fetchedToken;
         }
 
         log.info("Token is invalid or expired. Attempting to refresh token...");
         return refreshToken();
     }
 
-    private boolean isTokenValid() {
-        boolean isValid = token != null && token.isValid();
-        log.info("Checking if token is valid...: " + isValid);
-        log.info("isTokenValid: " + token);
-        return token != null && token.isValid();
-    }
-
-    private RedditToken refreshToken() {
-        RedditToken token;
+    private OAuthData refreshToken() {
         try {
-            token = fetchNewToken();
-            log.info("Token refreshed successfully.");
-            log.info(token.accessToken());
-            log.info(token.tokenType());
-            log.info(Integer.toString(token.expiresIn()));
-            log.info(token.scope());
-            log.info(token.expireAt().toString());
-
+            OAuthData token = fetchNewToken();
+            tokenStore.storeLatest(token);
+            return token;
         } catch (FeignException e) {
             log.error("Error while fetching access token, retrying not supported", e);
-            token = null; // Invalidate the token if refresh failed
+            tokenStore.deleteLatest();
+            return null;
         }
-        this.token = token;
-        return token;
     }
 
-    private RedditToken fetchNewToken() {
+    private OAuthData fetchNewToken() {
         log.info("Fetching new token...");
-        return redditOAuth.getRedditToken(GRANT_TYPE, config.getUserAgent());
+        return httpClient.getRedditToken(config);
     }
 
-    private AuthClient redditOAuthClient() {
+    private AuthClient createOAuthHttpClient() {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);

@@ -1,4 +1,4 @@
-package com.milabuda.redditconnector.api.client;
+package com.milabuda.redditconnector.api.oauth;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
