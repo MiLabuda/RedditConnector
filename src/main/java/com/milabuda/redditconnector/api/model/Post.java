@@ -2,7 +2,6 @@ package com.milabuda.redditconnector.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
