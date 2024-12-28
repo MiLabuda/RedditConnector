@@ -1,11 +1,10 @@
 package com.milabuda.redditconnector;
 
 import com.milabuda.redditconnector.api.client.PostManager;
-import com.milabuda.redditconnector.api.client.AuthManager;
 import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Post;
-import com.milabuda.redditconnector.api.model.RedditToken;
+import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.model.PostSchema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,17 +31,14 @@ public class RedditSourceTask extends SourceTask {
 
   private static final String POST_KAFKA_TOPIC = "reddit-posts";
 
-  public static final String URL = "url";
   public static final String LAST_READ_POST = "last_read_post";
   public static final String DEFAULT_FROM = "Full scan";
   public static final String SUBREDDIT_FIELD = "subreddit";
-  public static final String POST_FIELD = "post";
-
-
 
   private RedditSourceConfig config;
   private AuthManager authManager;
   private String nextPostAfter;
+  private boolean initialFullScanDone = false;
   private final Map<String, Long> postsMap = new HashMap<>();
 
 
@@ -78,10 +73,7 @@ public class RedditSourceTask extends SourceTask {
 
   @Override
   public List<SourceRecord> poll() throws InterruptedException {
-
-    RedditToken redditToken = authManager.getRedditToken();
-
-    List<SourceRecord> sourceRecords = new ArrayList<>(getRedditPostsAsSourceRecords(redditToken));
+    List<SourceRecord> sourceRecords = getRedditPostsAsSourceRecords(authManager);
     Thread.sleep(5000);
     return sourceRecords;
   }
@@ -91,10 +83,9 @@ public class RedditSourceTask extends SourceTask {
     //TODO: Do whatever is required to stop your task.
   }
 
-  List<SourceRecord> getRedditPostsAsSourceRecords(RedditToken token) {
-    PostManager postManager = new PostManager(config, token);
-
-    Listing<Post> postsResponse = postManager.getPosts(token);
+  List<SourceRecord> getRedditPostsAsSourceRecords(AuthManager authManager) {
+    PostManager postManager = new PostManager(config, authManager);
+    Listing<Post> postsResponse = retrievePosts(postManager);
 
     if (postsResponse == null) {
       log.info("No posts found. Returning empty list.");
@@ -108,6 +99,34 @@ public class RedditSourceTask extends SourceTask {
             .peek(post -> postsMap.put(post.data().id(), post.data().createdUtc()))
             .map(this::generatePostSourceRecord)
             .toList();
+  }
+
+  private Listing<Post> retrievePosts(PostManager postManager) {
+    boolean eligibleForFullScan = !initialFullScanDone && config.getInitialFullScan();
+    return eligibleForFullScan ? performInitialFullScan(postManager) : postManager.getPosts();
+  }
+
+  private Listing<Post> performInitialFullScan(PostManager postManager) {
+    log.info("Initial full scan of subreddits.");
+    Listing<Post> postsResponse = Listing.empty();
+    String after = null;
+    int count = 0;
+
+    while (true) {
+      Listing<Post> pageRecords = fetchPaginatedRecords(postManager, after, count);
+      if (pageRecords.after() == null) {
+        break;
+      }
+      postsResponse = postsResponse.addAll(pageRecords.children());
+      after = pageRecords.after();
+      count += pageRecords.children().size();
+    }
+    initialFullScanDone = true;
+    return postsResponse;
+  }
+
+  private Listing<Post> fetchPaginatedRecords(PostManager postManager, String after, Integer count) {
+    return postManager.getPostsWithPagination(after, count).data();
   }
 
   private SourceRecord generatePostSourceRecord(Envelope<Post> post) {
