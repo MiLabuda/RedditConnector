@@ -12,5 +12,6 @@ ENV JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,address=*:5005,server=
 
 EXPOSE 5005
 
+COPY src/main/resources/connect-log4j.properties /etc/kafka/connect-log4j.properties
 COPY target/reddit-connector-1.0-SNAPSHOT.jar /usr/share/java/
 CMD CLASSPATH="/usr/share/java/reddit-connector-1.0-SNAPSHOT.jar" connect-standalone config/worker.properties config/RedditSourceConnectorConfig.properties
