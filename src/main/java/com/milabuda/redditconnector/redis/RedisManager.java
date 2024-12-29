@@ -6,7 +6,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisManager {
 
-    private static JedisPool jedisPool;
+    private static final JedisPool jedisPool;
 
     static {
         final JedisPoolConfig poolConfig = buildPoolConfig();
