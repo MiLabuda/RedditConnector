@@ -68,11 +68,3 @@ public class RedditSourceConfig extends AbstractConfig {
     return new RedditSourceConfig(config);
   }
 }
-
-final class NonEmptyStringWithoutControlChars extends ConfigDef.NonEmptyStringWithoutControlChars {
-  //Only here to create nice human-readable for exporting to documentation.
-  @Override
-  public String toString() {
-    return "non-empty string and no ISO control characters";
-  }
-}
