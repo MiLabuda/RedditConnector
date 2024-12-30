@@ -1,5 +1,6 @@
 package com.milabuda.redditconnector.api.client;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.milabuda.redditconnector.api.oauth.AuthManager;
@@ -46,6 +47,7 @@ class CommentClientFactory {
     private CommentClient createRedditCommentsClient(OAuthData token) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
         return Feign.builder()
                 .encoder(new JacksonEncoder())

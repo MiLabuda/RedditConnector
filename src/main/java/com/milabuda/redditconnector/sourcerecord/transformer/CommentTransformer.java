@@ -24,7 +24,7 @@ public class CommentTransformer {
         try (Jedis jedis = RedisManager.getJedisResource()) {
             return comments
                     .stream()
-                    .sorted(Comparator.comparing(Comment::createdUtc))
+                    .sorted(Comparator.comparing(Comment::createdUtc, Comparator.nullsFirst(Long::compareTo)))
                     .filter(post -> redisCommentCache.isCommentNew(jedis, post))
                     .peek(post -> redisCommentCache.markCommentAsProcessed(jedis, post))
                     .map(commentRecordBuilder::buildSourceRecord)

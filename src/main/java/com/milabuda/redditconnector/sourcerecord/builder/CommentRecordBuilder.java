@@ -5,6 +5,7 @@ import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.sourcerecord.schema.CommentSchema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -27,17 +28,17 @@ public class CommentRecordBuilder {
                 buildRecordKey(comment),
                 CommentSchema.VALUE_SCHEMA,
                 buildRecordValue(comment),
-                Instant.ofEpochSecond(comment.createdUtc()).toEpochMilli());
+                comment.createdUtc() != null ? Instant.ofEpochSecond(comment.createdUtc()).toEpochMilli() : 0L);
     }
 
     private Struct buildRecordKey(Comment comment) {
         return new Struct(CommentSchema.KEY_SCHEMA)
-                .put(CommentSchema.POST_ID_FIELD, comment.parentId());
+                .put(CommentSchema.POST_ID_FIELD, getPostId(comment));
     }
 
     private Struct buildRecordValue(Comment comment) {
         return new Struct(CommentSchema.VALUE_SCHEMA)
-                .put(CommentSchema.POST_ID_FIELD, comment.linkId())
+                .put(CommentSchema.POST_ID_FIELD, getPostId(comment))
                 .put(CommentSchema.COMMENT_ID_FIELD, comment.id())
                 .put(CommentSchema.AUTHOR_FIELD, comment.author())
                 .put(CommentSchema.BODY_FIELD, comment.body())
@@ -47,7 +48,6 @@ public class CommentRecordBuilder {
                 .put(CommentSchema.UPS_COUNT_FIELD, comment.ups())
                 .put(CommentSchema.DOWNS_COUNT_FIELD, comment.downs())
                 .put(CommentSchema.PARENT_ID_FIELD, comment.parentId())
-                .put(CommentSchema.REPLIES_FIELD, comment.replies())
                 .put(CommentSchema.PERMALINK_FIELD, comment.permalink())
                 .put(CommentSchema.LINK_ID_FIELD, comment.linkId())
                 .put(CommentSchema.IS_SUBMITTER_FIELD, comment.isSubmitter())
@@ -59,5 +59,9 @@ public class CommentRecordBuilder {
                 .put(CommentSchema.GILDED_FIELD, comment.gilded())
                 .put(CommentSchema.SCORE_HIDDEN_FIELD, comment.scoreHidden())
                 .put(CommentSchema.AUTHOR_PREMIUM_FIELD, comment.authorPremium());
-}
+    }
+
+    private @NotNull String getPostId(Comment comment) {
+        return comment.linkId() != null ? comment.linkId().replace("t3_", "") : "NullKey";
+    }
 }
