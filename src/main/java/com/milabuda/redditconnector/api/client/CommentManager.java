@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CommentManager {
+
+    private static final int PROCESSING_LIMIT = 10;
 
     private static final Logger log = LoggerFactory.getLogger(CommentManager.class);
 
@@ -38,20 +41,7 @@ public class CommentManager {
         this.clientFactory = new CommentClientFactory(authManager);
     }
 
-    //TO BE REMOVED
-    public void migrateOldPostsToUpdates(Jedis jedis) {
-        Set<String> oldPosts = jedis.smembers("posts:stored");
-
-        for (String postId : oldPosts) {
-            if (jedis.zscore("posts:updates:sorted", postId) == null) {
-                jedis.zadd("posts:updates:sorted", Instant.now().toEpochMilli(), postId);
-            }
-        }
-        System.out.println("Migration completed: Old posts added to updates sorted set.");
-    }
-
     public List<Comment> retrieveComments() {
-        migrateOldPostsToUpdates(jedis);
         registerPostsToCheck();
         String postId;
         List<Comment> allComments = new ArrayList<>();
@@ -73,17 +63,21 @@ public class CommentManager {
         List<Comment> commentsList = new ArrayList<>();
         commentsList.add(comment);
 
-        if (comment.replies() != null) {
-            for (Envelope<Comment> reply : comment.replies().children()) {
-                commentsList.addAll(traverseComments(reply.data()));
+        if (comment.replies() != null && comment.replies().data() != null && !comment.replies().data().children().isEmpty()) {
+            List<Comment> replies = comment.replies().data().children().stream()
+                    .map(Envelope::data)
+                    .collect(Collectors.toList());
+
+            for (Comment reply : replies) {
+                commentsList.addAll(traverseComments(reply));
             }
         }
-
         return commentsList;
     }
 
     public void registerPostsToCheck() {
         Instant currentTime = Instant.now();
+        int counter = 0;
 
         List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(jedis, currentTime);
 
@@ -97,6 +91,12 @@ public class CommentManager {
                 redisApiCallsQueue.enqueuePostForProcessing(postId);
                 redisPostCache.updateLastCheckedTimestamp(jedis, currentTime.toEpochMilli(), postId);
                 log.info("Post added to queue for processing: {}", postId);
+
+                counter++;
+                if (counter >= PROCESSING_LIMIT) {
+                    log.info("Processed 10 posts, stopping for this iteration.");
+                    break;
+                }
             }
         }
     }
@@ -133,7 +133,7 @@ public class CommentManager {
                 return Listing.empty();
             }
 
-            return postWithCommentsList.getLast().data();
+            return postWithCommentsList.get(postWithCommentsList.size()-1).data();
         } catch (Exception e) {
             log.error("Error occurred while fetching comments for postId: {}", postId, e);
             return Listing.empty();
