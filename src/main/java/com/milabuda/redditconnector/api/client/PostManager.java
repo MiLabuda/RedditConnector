@@ -9,7 +9,10 @@ import com.milabuda.redditconnector.api.oauth.AuthManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PostManager {
@@ -26,30 +29,30 @@ public class PostManager {
         this.clientFactory = new PostClientFactory(authManager);
     }
 
-    public Listing<Post> retrievePosts() {
+    public List<Post> retrievePosts() {
         boolean eligibleForFullScan = !RedditSourceTask.isInitialFullScanDone() && config.getInitialFullScan();
-        Listing<Post> postsResponse =
+        List<Post> postsResponse =
                 eligibleForFullScan
                         ? performInitialFullScan()
                         : getPosts();
 
         if (postsResponse == null) {
             log.info("No posts found. Returning empty list.");
-            return Listing.empty();
+            return Collections.emptyList();
         }
         return postsResponse;
     }
 
-    private Listing<Post> performInitialFullScan() {
+    private List<Post> performInitialFullScan() {
         log.info("Initial full scan of subreddits.");
-        Listing<Post> postsResponse = Listing.empty();
+        List<Post> postsResponse = new ArrayList<>();
         String after = null;
         int count = 0;
 
         while (true) {
             Listing<Post> pageRecords = fetchPaginatedRecords( after, count);
 
-            postsResponse = postsResponse.addAll(pageRecords.children());
+            postsResponse.addAll(pageRecords.children().stream().map(Envelope::data).toList());
             if (pageRecords.after() == null) {
                 break;
             }
@@ -85,7 +88,7 @@ public class PostManager {
         }
     }
 
-    private Listing<Post> getPosts() {
+    private List<Post> getPosts() {
         try {
             PostClient client = clientFactory.getClient();
             Envelope<Listing<Post>> postsListingEnvelope = client.getPosts(
@@ -96,12 +99,12 @@ public class PostManager {
 
             if (postsListingEnvelope == null) {
                 log.error("No posts found");
-                return Listing.empty();
+                return Collections.emptyList();
             }
-            return postsListingEnvelope.data();
+            return postsListingEnvelope.data().children().stream().map(Envelope::data).toList();
         } catch (Exception e) {
             log.error("Error occurred while fetching posts: {}", e.getMessage());
-            return Listing.empty();
+            return Collections.emptyList();
         }
     }
 }

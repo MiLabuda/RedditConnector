@@ -4,11 +4,13 @@ import com.milabuda.redditconnector.api.client.CommentManager;
 import com.milabuda.redditconnector.api.client.PostManager;
 import com.milabuda.redditconnector.api.model.Comment;
 import com.milabuda.redditconnector.api.model.Listing;
+import com.milabuda.redditconnector.api.model.Pair;
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.redis.RedisManager;
 import com.milabuda.redditconnector.sourcerecord.builder.CommentRecordBuilder;
 import com.milabuda.redditconnector.sourcerecord.builder.PostRecordBuilder;
+import com.milabuda.redditconnector.sourcerecord.schema.EventType;
 import com.milabuda.redditconnector.sourcerecord.transformer.CommentTransformer;
 import com.milabuda.redditconnector.sourcerecord.transformer.PostTransformer;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -19,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class RedditSourceTask extends SourceTask {
 
@@ -54,7 +55,7 @@ public class RedditSourceTask extends SourceTask {
     log.debug("Starting RedditSourceTask.");
     config = new RedditSourceConfig(props);
     authManager = new AuthManager(config);
-    postRecordBuilder = new PostRecordBuilder(config);
+    postRecordBuilder = new PostRecordBuilder();
     postTransformer = new PostTransformer(postRecordBuilder);
     postManager = new PostManager(config, authManager);
     commentManager = new CommentManager(config, authManager);
@@ -66,7 +67,7 @@ public class RedditSourceTask extends SourceTask {
   public List<SourceRecord> poll() throws InterruptedException {
     List<SourceRecord> sourceRecords = new ArrayList<>();
     sourceRecords.addAll(getRedditPostsAsSourceRecords());
-    sourceRecords.addAll(getRedditCommentsAsSourceRecords());
+    sourceRecords.addAll(getRedditSubmissionsAsSourceRecords());
     Thread.sleep(5000);
     return sourceRecords;
   }
@@ -77,12 +78,18 @@ public class RedditSourceTask extends SourceTask {
   }
 
   List<SourceRecord> getRedditPostsAsSourceRecords() {
-    Listing<Post> postsResponse = postManager.retrievePosts();
-    return postTransformer.transform(postsResponse);
+    List<Post> postsResponse = postManager.retrievePosts();
+    return postTransformer.transform(postsResponse, EventType.CREATE);
   }
 
-  List<SourceRecord> getRedditCommentsAsSourceRecords() {
-    List<Comment> commentsResponse = commentManager.retrieveComments();
-    return commentTransformer.transform(commentsResponse);
+  List<SourceRecord> getRedditSubmissionsAsSourceRecords() {
+    Pair<List<Post>, List<Comment>> commentsAndPostsResponse = commentManager.retrieveCommentsAndPostUpdates();
+    List<Post> posts = commentsAndPostsResponse.left();
+    List<Comment> comments = commentsAndPostsResponse.right();
+
+    List<SourceRecord> sourceRecords = new ArrayList<>();
+    sourceRecords.addAll(postTransformer.transform(posts, EventType.UPDATE));
+    sourceRecords.addAll(commentTransformer.transform(comments));
+    return sourceRecords;
   }
 }
