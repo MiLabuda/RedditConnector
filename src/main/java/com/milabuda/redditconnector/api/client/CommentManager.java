@@ -1,9 +1,18 @@
 package com.milabuda.redditconnector.api.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.milabuda.redditconnector.RedditSourceConfig;
 import com.milabuda.redditconnector.api.model.Comment;
 import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.api.model.Listing;
+import com.milabuda.redditconnector.api.model.Pair;
+import com.milabuda.redditconnector.api.model.Post;
+import com.milabuda.redditconnector.api.model.PostAndCommentData;
 import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
 import com.milabuda.redditconnector.redis.RedisManager;
@@ -19,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CommentManager {
@@ -41,22 +49,31 @@ public class CommentManager {
         this.clientFactory = new CommentClientFactory(authManager);
     }
 
-    public List<Comment> retrieveComments() {
+    public Pair<List<Post>, List<Comment>> retrieveCommentsAndPostUpdates() {
         registerPostsToCheck();
         String postId;
         List<Comment> allComments = new ArrayList<>();
+        List<Post> allPosts = new ArrayList<>();
 
         while ((postId = redisApiCallsQueue.getPostReadyForProcessing()) != null) {
-            Listing<Comment> postWithComments = getComments(postId);
-            if (postWithComments == null) {
+            PostAndCommentData postAndCommentData = getPostAndComments(postId);
+            if (postAndCommentData == null) {
                 continue;
             }
-            for (Envelope<Comment> comment : postWithComments.children()) {
+            int initialSize = allComments.size();
+            for (Envelope<Comment> comment : postAndCommentData.comments().data().children()) {
                 allComments.addAll(traverseComments(comment.data()));
             }
-            log.info("Retrieved {} comments for postId: {}", allComments.size(), postId);
+            int retrievedComments = allComments.size() - initialSize;
+            log.info("Retrieved {} comments for postId: {}", retrievedComments, postId);
+
+
+            for (Envelope<Post> post : postAndCommentData.post().data().children()) {
+                allPosts.add(post.data());
+                log.info("Retrieved post update for postId: {}", postId);
+            }
         }
-        return allComments;
+        return new Pair<>(allPosts, allComments);
     }
 
     private List<Comment> traverseComments(Comment comment) {
@@ -79,17 +96,17 @@ public class CommentManager {
         Instant currentTime = Instant.now();
         int counter = 0;
 
-        List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(jedis, currentTime);
+        List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(jedis);
 
         for (Tuple postTuple : postsWithTimestamps) {
             String postId = postTuple.getElement();
-            Instant lastActivityTime = Instant.ofEpochSecond((long) postTuple.getScore());
+            Instant lastActivityTime = Instant.ofEpochMilli((long) postTuple.getScore());
 
-            Long lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(jedis, postId);
+            Instant lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(jedis, postId);
 
             if (shouldProcessPost(lastActivityTime, lastCheckedTimestamp, currentTime)) {
                 redisApiCallsQueue.enqueuePostForProcessing(postId);
-                redisPostCache.updateLastCheckedTimestamp(jedis, currentTime.toEpochMilli(), postId);
+                redisPostCache.updateLastCheckedTimestamp(jedis, currentTime, postId);
                 log.info("Post added to queue for processing: {}", postId);
 
                 counter++;
@@ -101,43 +118,48 @@ public class CommentManager {
         }
     }
 
-    private boolean shouldProcessPost(Instant lastActivityTime, Long lastCheckedTimestamp, Instant currentTime) {
+    private boolean shouldProcessPost(Instant lastActivityTime, Instant lastCheckedTimestamp, Instant currentTime) {
         long elapsedSinceActivity = Duration.between(lastActivityTime, currentTime).toSeconds();
         long elapsedSinceCheck = lastCheckedTimestamp == null
                 ? Long.MAX_VALUE
-                : Duration.between(Instant.ofEpochSecond(lastCheckedTimestamp), currentTime).toSeconds();
+                : Duration.between(lastCheckedTimestamp, currentTime).toSeconds();
 
-        return (elapsedSinceActivity <= 3600 && elapsedSinceCheck >= 600) // < 1 godzina, > 10 minut
-                || (elapsedSinceActivity <= 10800 && elapsedSinceCheck >= 900) // < 3 godziny, > 15 minut
-                || (elapsedSinceActivity <= 21600 && elapsedSinceCheck >= 1800) // < 6 godzin, > 30 minut
-                || (elapsedSinceActivity <= 43200 && elapsedSinceCheck >= 3600) // < 12 godzin, > 60 minut
-                || (elapsedSinceActivity <= 86400 && elapsedSinceCheck >= 7200) // < 24 godziny, > 120 minut
-                || (elapsedSinceActivity <= 172800 && elapsedSinceCheck >= 10800) // < 48 godzin, > 180 minut
-                || (elapsedSinceActivity > 172800 && elapsedSinceCheck >= 21600); // > 48 godzin, > 360 minut
+        return (elapsedSinceActivity <= 3600 && elapsedSinceCheck >= 600)
+                || (elapsedSinceActivity <= 10800 && elapsedSinceCheck >= 900)
+                || (elapsedSinceActivity <= 21600 && elapsedSinceCheck >= 1800)
+                || (elapsedSinceActivity <= 43200 && elapsedSinceCheck >= 3600)
+                || (elapsedSinceActivity <= 86400 && elapsedSinceCheck >= 7200)
+                || (elapsedSinceActivity <= 172800 && elapsedSinceCheck >= 10800)
+                || (elapsedSinceActivity > 172800 && elapsedSinceCheck >= 21600);
     }
 
-    private Listing<Comment> getComments(String postId) {
+    private PostAndCommentData getPostAndComments(String postId) {
         try {
             CommentClient client = clientFactory.getClient();
             Map<String, Object> queryMap = new HashMap<>();
 
-            List<Envelope<Listing<Comment>>> postWithCommentsList = client.getPostWithComments(
+            JsonNode root = client.getPostWithComments(
                     config.getSubreddits(),
                     postId,
                     authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     queryMap);
 
-            if (postWithCommentsList == null || postWithCommentsList.isEmpty()) {
-                log.warn("No comments found for postId: {}", postId);
-                return Listing.empty();
-            }
+            Envelope<Listing<Post>> post = mapJsonNode(root.get(0), new TypeReference<>() {});
+            Envelope<Listing<Comment>> comments = mapJsonNode(root.get(1), new TypeReference<>() {});
 
-            return postWithCommentsList.get(postWithCommentsList.size()-1).data();
+            return new PostAndCommentData(post, comments);
         } catch (Exception e) {
             log.error("Error occurred while fetching comments for postId: {}", postId, e);
-            return Listing.empty();
+            return null;
         }
+    }
+
+    private <T> T mapJsonNode(JsonNode node, TypeReference<T> typeReference) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        return objectMapper.treeToValue(node, typeReference);
     }
 
 }

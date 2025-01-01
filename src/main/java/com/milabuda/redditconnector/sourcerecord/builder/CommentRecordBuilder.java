@@ -1,9 +1,12 @@
 package com.milabuda.redditconnector.sourcerecord.builder;
 
 import com.milabuda.redditconnector.api.model.Comment;
-import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.sourcerecord.schema.CommentSchema;
+import com.milabuda.redditconnector.sourcerecord.schema.EventType;
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.header.ConnectHeaders;
+import org.apache.kafka.connect.header.Headers;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,10 +17,21 @@ import java.util.Map;
 public class CommentRecordBuilder {
 
     private static final String COMMENT_KAFKA_TOPIC = "reddit-comments";
+    public static final String EVENT_TYPE_FIELD = "event_type";
+    private final Map<String, String> sourcePartition = new HashMap<>();
+    private final Map<String, String> sourceOffset = new HashMap<>();
 
-    public SourceRecord buildSourceRecord(Comment comment) {
-        Map<String, String> sourcePartition = new HashMap<>();
-        Map<String, String> sourceOffset = new HashMap<>();
+    public SourceRecord buildSourceRecordOfTypeCreate(Comment comment) {
+        return buildSourceRecord(comment, EventType.CREATE);
+    }
+
+    public SourceRecord buildSourceRecordOfTypeUpdate(Comment comment) {
+        return buildSourceRecord(comment, EventType.UPDATE);
+    }
+
+    private SourceRecord buildSourceRecord(Comment comment, EventType eventType) {
+        Headers headers = new ConnectHeaders();
+        headers.add(EVENT_TYPE_FIELD, eventType.toString(), Schema.STRING_SCHEMA);
 
         return new SourceRecord(
                 sourcePartition,
@@ -28,7 +42,8 @@ public class CommentRecordBuilder {
                 buildRecordKey(comment),
                 CommentSchema.VALUE_SCHEMA,
                 buildRecordValue(comment),
-                comment.createdUtc() != null ? Instant.ofEpochSecond(comment.createdUtc()).toEpochMilli() : 0L);
+                Instant.now().toEpochMilli(),
+                headers);
     }
 
     private Struct buildRecordKey(Comment comment) {
