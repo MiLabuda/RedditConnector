@@ -52,7 +52,7 @@ public class PostSchema {
             .field(IS_ORIGINAL_CONTENT_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
             .field(URL_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .field(PERMALINK_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
-            .field(ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(ID_FIELD, Schema.STRING_SCHEMA)
             .field(SUBMISSION_TYPE_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 }

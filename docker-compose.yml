@@ -123,6 +123,7 @@ services:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
 
   redis:
     image: redis:8.0-M02
@@ -176,3 +177,4 @@ services:
       - kafka2
       - kafka3
       - postgres
+      - kafka-connect

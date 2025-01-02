@@ -58,6 +58,6 @@ public class CommentSchema {
             .field(GILDED_FIELD, Schema.OPTIONAL_INT32_SCHEMA)
             .field(SCORE_HIDDEN_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
             .field(AUTHOR_PREMIUM_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
-            .field(ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(ID_FIELD, Schema.STRING_SCHEMA)
             .build();
 }
