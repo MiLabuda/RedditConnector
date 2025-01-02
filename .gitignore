@@ -37,6 +37,7 @@ gen
 *.properties
 /kafka-data/*
 /redis-data/*
+/postgres-data/*
 /target/*
 dependency-reduced-pom.xml
 
