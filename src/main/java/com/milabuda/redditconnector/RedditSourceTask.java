@@ -64,11 +64,10 @@ public class RedditSourceTask extends SourceTask {
   }
 
   @Override
-  public List<SourceRecord> poll() throws InterruptedException {
+  public List<SourceRecord> poll(){
     List<SourceRecord> sourceRecords = new ArrayList<>();
     sourceRecords.addAll(getRedditPostsAsSourceRecords());
     sourceRecords.addAll(getRedditSubmissionsAsSourceRecords());
-    Thread.sleep(5000);
     return sourceRecords;
   }
 

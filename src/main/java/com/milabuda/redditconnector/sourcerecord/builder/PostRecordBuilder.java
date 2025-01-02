@@ -48,6 +48,7 @@ public class PostRecordBuilder {
     private Struct buildRecordValue(Post post) {
         return new Struct(PostSchema.VALUE_SCHEMA)
                 .put(PostSchema.TITLE_FIELD, post.title())
+                .put(PostSchema.SUBMISSION_ID_FIELD, post.id())
                 .put(PostSchema.SELF_TEXT_FIELD, post.selftext())
                 .put(PostSchema.AUTHOR_FIELD, post.author())
                 .put(PostSchema.SUBREDDIT_FIELD, post.subreddit())
