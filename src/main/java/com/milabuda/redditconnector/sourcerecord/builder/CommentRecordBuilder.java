@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class CommentRecordBuilder {
 
@@ -53,7 +54,7 @@ public class CommentRecordBuilder {
 
     private Struct buildRecordValue(Comment comment) {
         return new Struct(CommentSchema.VALUE_SCHEMA)
-                .put(CommentSchema.ID_FIELD, comment.id())
+                .put(CommentSchema.ID_FIELD, getId(comment))
                 .put(CommentSchema.COMMENT_ID_FIELD, comment.id())
                 .put(CommentSchema.AUTHOR_FIELD, comment.author())
                 .put(CommentSchema.BODY_FIELD, comment.body())
@@ -78,5 +79,9 @@ public class CommentRecordBuilder {
 
     private @NotNull String getPostId(Comment comment) {
         return comment.linkId() != null ? comment.linkId().split("_")[1] : "NullKey";
+    }
+
+    private @NotNull String getId(Comment comment) {
+        return comment.id() != null ? comment.id() : UUID.randomUUID().toString();
     }
 }
