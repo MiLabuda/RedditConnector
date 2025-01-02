@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# Clean and package the Maven project
-mvn clean package
 
-# Build the Docker image
-docker build . -t my-reddit-connector:1.0
+# Set the Docker image tag
+TAG=$(git describe --tags --abbrev=0)
+
+# Build and push Docker image using Maven
+mvn clean package docker:build -Ddocker.tag=$TAG docker:push
 
 # Stop and remove existing Docker containers
 docker compose down

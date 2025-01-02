@@ -16,6 +16,7 @@
         <slf4j-log4j12>2.0.16</slf4j-log4j12>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <docker.tag>latest</docker.tag>
     </properties>
 
     <dependencies>
@@ -86,6 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -116,6 +118,30 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.45.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                        <images>
+                            <image>
+                                <name>milabuda544/kafka-reddit-connector:${docker.tag}</name>
+                                <build>
+                                    <dockerFile>Dockerfile</dockerFile>
+                                <contextDir>${project.basedir}</contextDir>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -128,6 +154,10 @@
         <repository>
             <id>confluent</id>
             <url>http://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
+            <id>fabric8-repo</id>
+            <url>https://maven.fabric8.io/</url>
         </repository>
     </repositories>
 </project>
