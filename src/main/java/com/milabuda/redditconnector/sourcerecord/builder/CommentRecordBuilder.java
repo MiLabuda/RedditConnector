@@ -53,7 +53,7 @@ public class CommentRecordBuilder {
 
     private Struct buildRecordValue(Comment comment) {
         return new Struct(CommentSchema.VALUE_SCHEMA)
-                .put(CommentSchema.POST_ID_FIELD, getPostId(comment))
+                .put(CommentSchema.SUBMISSION_ID_FIELD, getPostId(comment))
                 .put(CommentSchema.COMMENT_ID_FIELD, comment.id())
                 .put(CommentSchema.AUTHOR_FIELD, comment.author())
                 .put(CommentSchema.BODY_FIELD, comment.body())
@@ -77,6 +77,6 @@ public class CommentRecordBuilder {
     }
 
     private @NotNull String getPostId(Comment comment) {
-        return comment.linkId() != null ? comment.linkId().replace("t3_", "") : "NullKey";
+        return comment.linkId() != null ? comment.linkId().split("_")[1] : "NullKey";
     }
 }

@@ -7,6 +7,7 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 public class CommentSchema {
 
     public static final String POST_ID_FIELD = "postId";
+    public static final String SUBMISSION_ID_FIELD = "submissionId";
     public static final String COMMENT_ID_FIELD = "commentId";
     public static final String AUTHOR_FIELD = "author";
     public static final String BODY_FIELD = "body";
@@ -57,6 +58,6 @@ public class CommentSchema {
             .field(GILDED_FIELD, Schema.OPTIONAL_INT32_SCHEMA)
             .field(SCORE_HIDDEN_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
             .field(AUTHOR_PREMIUM_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
-            .field(POST_ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(SUBMISSION_ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 }
