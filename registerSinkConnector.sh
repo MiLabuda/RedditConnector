@@ -13,8 +13,8 @@ curl -X POST -H "Content-Type: application/json" \
       "insert.mode": "upsert",
       "auto.create": "true",
       "auto.evolve": "true",
-      "pk.mode": "record_value"
-      "pk.fields": "postId, commentId"
+      "pk.mode": "record_value",
+      "pk.fields": "id"
     }
   }' \
   http://localhost:8084/connectors

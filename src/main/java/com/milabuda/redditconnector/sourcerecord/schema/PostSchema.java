@@ -6,7 +6,7 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 public class PostSchema {
 
     public static final String POST_ID_FIELD = "postId";
-    public static final String SUBMISSION_ID_FIELD = "submissionId";
+    public static final String ID_FIELD = "id";
     public static final String SELF_TEXT_FIELD = "selftext";
     public static final String TITLE_FIELD = "title";
     public static final String AUTHOR_FIELD = "author";
@@ -24,6 +24,7 @@ public class PostSchema {
     public static final String IS_ORIGINAL_CONTENT_FIELD = "isOriginalContent";
     public static final String URL_FIELD = "url";
     public static final String PERMALINK_FIELD = "permalink";
+    public static final String SUBMISSION_TYPE_FIELD = "type";
 
     public static final Schema KEY_SCHEMA = SchemaBuilder.struct()
             .name(PostSchema.class.getSimpleName())
@@ -51,6 +52,7 @@ public class PostSchema {
             .field(IS_ORIGINAL_CONTENT_FIELD, Schema.OPTIONAL_BOOLEAN_SCHEMA)
             .field(URL_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .field(PERMALINK_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
-            .field(SUBMISSION_ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(ID_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(SUBMISSION_TYPE_FIELD, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 }

@@ -53,7 +53,8 @@ public class CommentRecordBuilder {
 
     private Struct buildRecordValue(Comment comment) {
         return new Struct(CommentSchema.VALUE_SCHEMA)
-                .put(CommentSchema.SUBMISSION_ID_FIELD, getPostId(comment))
+                .put(CommentSchema.ID_FIELD, comment.id())
+                .put(CommentSchema.POST_ID_FIELD, getPostId(comment))
                 .put(CommentSchema.COMMENT_ID_FIELD, comment.id())
                 .put(CommentSchema.AUTHOR_FIELD, comment.author())
                 .put(CommentSchema.BODY_FIELD, comment.body())

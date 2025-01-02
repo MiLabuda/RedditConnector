@@ -47,14 +47,25 @@ public class PostRecordBuilder {
 
     private Struct buildRecordValue(Post post) {
         return new Struct(PostSchema.VALUE_SCHEMA)
-                .put(PostSchema.TITLE_FIELD, post.title())
-                .put(PostSchema.SUBMISSION_ID_FIELD, post.id())
+                .put(PostSchema.ID_FIELD, post.id())
                 .put(PostSchema.SELF_TEXT_FIELD, post.selftext())
+                .put(PostSchema.TITLE_FIELD, post.title())
                 .put(PostSchema.AUTHOR_FIELD, post.author())
                 .put(PostSchema.SUBREDDIT_FIELD, post.subreddit())
                 .put(PostSchema.SCORE_FIELD, post.score())
                 .put(PostSchema.NUM_COMMENTS_FIELD, post.numComments())
                 .put(PostSchema.CREATED_AT_FIELD, post.createdUtc())
-                .put(PostSchema.UPVOTE_RATIO_FIELD, post.upvoteRatio());
+                .put(PostSchema.UPVOTE_RATIO_FIELD, post.upvoteRatio())
+                .put(PostSchema.SUBREDDIT_SUBSCRIBERS_COUNT_FIELD, post.subredditSubscribers())
+                .put(PostSchema.UPS_COUNT_FIELD, post.ups())
+                .put(PostSchema.DOWNS_COUNT_FIELD, post.downs())
+                .put(PostSchema.TOTAL_AWARDS_RECEIVED_COUNT_FIELD, post.totalAwardsReceived())
+                .put(PostSchema.IS_VIDEO_FIELD, post.isVideo())
+                .put(PostSchema.OVER_18_FIELD, post.over18())
+                .put(PostSchema.IS_ORIGINAL_CONTENT_FIELD, post.isOriginalContent())
+                .put(PostSchema.URL_FIELD, post.url())
+                .put(PostSchema.PERMALINK_FIELD, post.permalink())
+                .put(PostSchema.SUBMISSION_TYPE_FIELD, post.name().substring(0, post.name().indexOf("_")));
     }
+
 }
