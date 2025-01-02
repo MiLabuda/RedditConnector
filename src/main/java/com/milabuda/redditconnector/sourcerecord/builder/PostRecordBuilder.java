@@ -46,6 +46,9 @@ public class PostRecordBuilder {
     }
 
     private Struct buildRecordValue(Post post) {
+        String name = post.name();
+        String submissionType = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
+
         return new Struct(PostSchema.VALUE_SCHEMA)
                 .put(PostSchema.ID_FIELD, post.id())
                 .put(PostSchema.SELF_TEXT_FIELD, post.selftext())
@@ -65,7 +68,7 @@ public class PostRecordBuilder {
                 .put(PostSchema.IS_ORIGINAL_CONTENT_FIELD, post.isOriginalContent())
                 .put(PostSchema.URL_FIELD, post.url())
                 .put(PostSchema.PERMALINK_FIELD, post.permalink())
-                .put(PostSchema.SUBMISSION_TYPE_FIELD, post.name().substring(0, post.name().indexOf("_")));
+                .put(PostSchema.SUBMISSION_TYPE_FIELD, submissionType);
     }
 
 }
