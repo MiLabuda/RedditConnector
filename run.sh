@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 
-
-# Set the Docker image tag
+# Set the Docker image tag based on the latest Git tag
 TAG=$(git describe --tags --abbrev=0)
 
-# Build and push Docker image using Maven
+# Set the Docker image name
+IMAGE_NAME="milabuda544/kafka-reddit-connector"
+
+# Build and push Docker image with the specific tag
 mvn clean package docker:build -Ddocker.tag=$TAG docker:push
+
+# Tag the image as 'latest'
+docker tag $IMAGE_NAME:$TAG $IMAGE_NAME:latest
+
+# Push the 'latest' tag
+docker push $IMAGE_NAME:latest
 
 # Stop and remove existing Docker containers
 docker compose down

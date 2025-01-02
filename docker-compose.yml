@@ -109,7 +109,7 @@ services:
       - kafka-connect-sink
 
   kafka-connect:
-    image: my-reddit-connector:1.0
+    image: milabuda544/kafka-reddit-connector:latest
     volumes:
       - ./config:/kafka-connect-source-reddit/config
       - ./kafka-data/offsets:/kafka-connect-source-reddit/offsets
