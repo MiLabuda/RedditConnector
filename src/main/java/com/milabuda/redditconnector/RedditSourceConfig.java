@@ -22,7 +22,7 @@ public class RedditSourceConfig extends AbstractConfig {
   public static final String USER_AGENT_CONFIG = "reddit.user.agent";
   private static final String USER_AGENT_DOC = "Reddit User Agent for API access.";
 
-  public static final String SUBREDDIT_CONFIG = "reddit.subreddits";
+  public static final String SUBREDDIT_CONFIG = "reddit.subreddit";
   private static final String SUBREDDIT_DOC = "Name of subreddit to fetch.";
 
   public static final String LAST_READ_POST_CONFIG = "reddit.last.read.post";
@@ -39,7 +39,7 @@ public class RedditSourceConfig extends AbstractConfig {
   public String getClientId() {return this.getString(CLIENT_ID_CONFIG);}
   public String getClientSecret() {return this.getString(CLIENT_SECRET_CONFIG);}
   public String getUserAgent() {return this.getString(USER_AGENT_CONFIG);}
-  public String getSubreddits() {return this.getString(SUBREDDIT_CONFIG);}
+  public String getSubreddit() {return this.getString(SUBREDDIT_CONFIG);}
   public String getLastReadPost() {return this.getString(LAST_READ_POST_CONFIG);}
   public boolean getInitialFullScan() {return this.getBoolean(INITIAL_FULL_SCAN_CONFIG);}
   public String getGrantType() {return GRANT_TYPE;}

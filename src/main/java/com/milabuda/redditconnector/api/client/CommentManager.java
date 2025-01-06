@@ -94,7 +94,7 @@ public class CommentManager {
             Map<String, Object> queryMap = new HashMap<>();
 
             JsonNode root = client.getPostWithComments(
-                    config.getSubreddits(),
+                    config.getSubreddit(),
                     postId,
                     authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),

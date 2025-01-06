@@ -79,7 +79,7 @@ public class PostManager {
         try {
             PostClient client = clientFactory.getClient();
             return client.getPosts(
-                    config.getSubreddits(),
+                    config.getSubreddit(),
                     authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     queryParams);
@@ -93,7 +93,7 @@ public class PostManager {
         try {
             PostClient client = clientFactory.getClient();
             Envelope<Listing<Post>> postsListingEnvelope = client.getPosts(
-                    config.getSubreddits(),
+                    config.getSubreddit(),
                     authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     null);
