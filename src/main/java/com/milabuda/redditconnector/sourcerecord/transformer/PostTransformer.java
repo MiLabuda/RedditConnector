@@ -16,8 +16,8 @@ public class PostTransformer{
     private final PostRecordBuilder postRecordBuilder;
     private final RedisPostCache redisPostCache;
 
-    public PostTransformer(PostRecordBuilder postRecordBuilder) {
-        this.postRecordBuilder = postRecordBuilder;
+    public PostTransformer() {
+        this.postRecordBuilder = new PostRecordBuilder();
         this.redisPostCache = new RedisPostCache();
     }
 

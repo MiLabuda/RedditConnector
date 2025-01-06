@@ -3,16 +3,14 @@ package com.milabuda.redditconnector;
 import com.milabuda.redditconnector.api.client.CommentManager;
 import com.milabuda.redditconnector.api.client.PostManager;
 import com.milabuda.redditconnector.api.model.Comment;
-import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Pair;
 import com.milabuda.redditconnector.api.model.Post;
-import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.redis.RedisManager;
-import com.milabuda.redditconnector.sourcerecord.builder.CommentRecordBuilder;
-import com.milabuda.redditconnector.sourcerecord.builder.PostRecordBuilder;
 import com.milabuda.redditconnector.sourcerecord.schema.EventType;
 import com.milabuda.redditconnector.sourcerecord.transformer.CommentTransformer;
 import com.milabuda.redditconnector.sourcerecord.transformer.PostTransformer;
+import com.milabuda.redditconnector.util.SimpleDIContainer;
+import com.milabuda.redditconnector.util.VersionUtil;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
@@ -26,24 +24,11 @@ public class RedditSourceTask extends SourceTask {
 
   private static final Logger log = LoggerFactory.getLogger(RedditSourceTask.class);
 
-  private static boolean initialFullScanDone = false;
-
-  private AuthManager authManager;
-  private RedditSourceConfig config;
+  private final SimpleDIContainer container = new SimpleDIContainer();
   private PostManager postManager;
-  private PostRecordBuilder postRecordBuilder;
   private PostTransformer postTransformer;
   private CommentManager commentManager;
-  private CommentRecordBuilder commentRecordBuilder;
   private CommentTransformer commentTransformer;
-
-  public static void setInitialFullScanDone() {
-    RedditSourceTask.initialFullScanDone = true;
-  }
-
-  public static boolean isInitialFullScanDone() {
-      return RedditSourceTask.initialFullScanDone;
-  }
 
   @Override
   public String version() {
@@ -53,14 +38,13 @@ public class RedditSourceTask extends SourceTask {
   @Override
   public void start(Map<String, String> props) {
     log.debug("Starting RedditSourceTask.");
-    config = new RedditSourceConfig(props);
-    authManager = new AuthManager(config);
-    postRecordBuilder = new PostRecordBuilder();
-    postTransformer = new PostTransformer(postRecordBuilder);
-    postManager = new PostManager(config, authManager);
-    commentManager = new CommentManager(config, authManager);
-    commentRecordBuilder = new CommentRecordBuilder();
-    commentTransformer = new CommentTransformer(commentRecordBuilder);
+
+    DependencyConfigurator.configure(container, props);
+
+    postManager = container.resolve(PostManager.class);
+    commentManager = container.resolve(CommentManager.class);
+    postTransformer = container.resolve(PostTransformer.class);
+    commentTransformer = container.resolve(CommentTransformer.class);
   }
 
   @Override

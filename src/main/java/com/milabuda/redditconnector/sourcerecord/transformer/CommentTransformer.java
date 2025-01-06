@@ -16,8 +16,8 @@ public class CommentTransformer {
     private final CommentRecordBuilder commentRecordBuilder;
     private final RedisCommentCache redisCommentCache;
 
-    public CommentTransformer(CommentRecordBuilder commentRecordBuilder) {
-        this.commentRecordBuilder = commentRecordBuilder;
+    public CommentTransformer() {
+        this.commentRecordBuilder = new CommentRecordBuilder();
         this.redisCommentCache = new RedisCommentCache();
     }
 

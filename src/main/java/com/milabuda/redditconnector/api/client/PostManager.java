@@ -1,7 +1,6 @@
 package com.milabuda.redditconnector.api.client;
 
 import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.RedditSourceTask;
 import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Post;
@@ -22,15 +21,17 @@ public class PostManager {
     private final RedditSourceConfig config;
     private final AuthManager authManager;
     private final PostClientFactory clientFactory;
+    private final InitialFullScanState initialFullScanState;
 
-    public PostManager(RedditSourceConfig config, AuthManager authManager) {
+    public PostManager(RedditSourceConfig config, AuthManager authManager, PostClientFactory clientFactory, InitialFullScanState initialFullScanState) {
         this.config = config;
         this.authManager = authManager;
-        this.clientFactory = new PostClientFactory(authManager);
+        this.clientFactory = clientFactory;
+        this.initialFullScanState = initialFullScanState;
     }
 
     public List<Post> retrievePosts() {
-        boolean eligibleForFullScan = !RedditSourceTask.isInitialFullScanDone() && config.getInitialFullScan();
+        boolean eligibleForFullScan = !initialFullScanState.isInitialFullScanDone() && config.getInitialFullScan();
         List<Post> postsResponse =
                 eligibleForFullScan
                         ? performInitialFullScan()
@@ -60,7 +61,7 @@ public class PostManager {
             count += pageRecords.children().size();
 
         }
-        RedditSourceTask.setInitialFullScanDone();
+        initialFullScanState.markInitialFullScanDone();
         return postsResponse;
     }
 
