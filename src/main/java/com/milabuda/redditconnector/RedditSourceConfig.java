@@ -22,8 +22,8 @@ public class RedditSourceConfig extends AbstractConfig {
   public static final String USER_AGENT_CONFIG = "reddit.user.agent";
   private static final String USER_AGENT_DOC = "Reddit User Agent for API access.";
 
-  public static final String SUBREDDITS_CONFIG = "reddit.subreddits";
-  private static final String SUBREDDITS_DOC = "Comma-separated list of subreddits to fetch.";
+  public static final String SUBREDDIT_CONFIG = "reddit.subreddits";
+  private static final String SUBREDDIT_DOC = "Name of subreddit to fetch.";
 
   public static final String LAST_READ_POST_CONFIG = "reddit.last.read.post";
   private static final String LAST_READ_POST_DOC = "Last read timestamp from Reddit API.";
@@ -39,7 +39,7 @@ public class RedditSourceConfig extends AbstractConfig {
   public String getClientId() {return this.getString(CLIENT_ID_CONFIG);}
   public String getClientSecret() {return this.getString(CLIENT_SECRET_CONFIG);}
   public String getUserAgent() {return this.getString(USER_AGENT_CONFIG);}
-  public String getSubreddits() {return this.getString(SUBREDDITS_CONFIG);}
+  public String getSubreddits() {return this.getString(SUBREDDIT_CONFIG);}
   public String getLastReadPost() {return this.getString(LAST_READ_POST_CONFIG);}
   public boolean getInitialFullScan() {return this.getBoolean(INITIAL_FULL_SCAN_CONFIG);}
   public String getGrantType() {return GRANT_TYPE;}
@@ -55,7 +55,7 @@ public class RedditSourceConfig extends AbstractConfig {
             .define(CLIENT_ID_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_ID_DOC)
             .define(CLIENT_SECRET_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_SECRET_DOC)
             .define(USER_AGENT_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USER_AGENT_DOC)
-            .define(SUBREDDITS_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, SUBREDDITS_DOC)
+            .define(SUBREDDIT_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, SUBREDDIT_DOC)
             .define(LAST_READ_POST_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, LAST_READ_POST_DOC)
             .define(INITIAL_FULL_SCAN_CONFIG, ConfigDef.Type.BOOLEAN, INITIAL_FULL_SCAN_DEFAULT, Importance.LOW, INITIAL_FULL_SCAN_DOC);
   }
