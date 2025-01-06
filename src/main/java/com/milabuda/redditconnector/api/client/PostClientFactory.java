@@ -7,9 +7,11 @@ import com.milabuda.redditconnector.api.oauth.BearerAuthInterceptor;
 import com.milabuda.redditconnector.api.oauth.OAuthData;
 import feign.Feign;
 import feign.Logger.Level;
+import feign.Retryer;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PostClientFactory {
@@ -52,6 +54,7 @@ public class PostClientFactory {
                 .errorDecoder(new CustomErrorDecoder())
                 .logger(new CustomLogger())
                 .logLevel(Level.FULL)
+                .retryer(new Retryer.Default(100, TimeUnit.SECONDS.toMillis(1), 3))
                 .requestInterceptor(new BearerAuthInterceptor(token.accessToken()))
                 .target(PostClient.class, "https://oauth.reddit.com");
     }
