@@ -7,7 +7,7 @@ curl -X POST -H "Content-Type: application/json" \
       "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
       "tasks.max": "6",
       "topics": "reddit-posts,reddit-comments",
-      "connection.url": "jdbc:postgresql://postgres:5432/postgres",
+      "connection.url": "jdbc:postgresql://postgres:5432/subreddit-db",
       "connection.user": "user",
       "connection.password": "developmentpassword",
       "insert.mode": "upsert",
