@@ -28,18 +28,15 @@ public class CommentManager {
     private static final Logger log = LoggerFactory.getLogger(CommentManager.class);
 
     private final RedditSourceConfig config;
-    private final AuthManager authManager;
     private final CommentClientFactory clientFactory;
     private final RedisApiCallsQueue redisApiCallsQueue;
     private final SubmissionUpdateScheduler submissionUpdateScheduler;
 
     public CommentManager(RedditSourceConfig config,
-                          AuthManager authManager,
                           CommentClientFactory clientFactory,
                           RedisApiCallsQueue redisApiCallsQueue,
                           SubmissionUpdateScheduler submissionUpdateScheduler) {
         this.config = config;
-        this.authManager = authManager;
         this.clientFactory = clientFactory;
         this.redisApiCallsQueue = redisApiCallsQueue;
         this.submissionUpdateScheduler = submissionUpdateScheduler;
@@ -96,7 +93,6 @@ public class CommentManager {
             JsonNode root = client.getPostWithComments(
                     config.getSubreddit(),
                     postId,
-                    authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     queryMap);
 

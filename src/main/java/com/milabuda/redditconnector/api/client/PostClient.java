@@ -13,10 +13,9 @@ import java.util.Map;
 public interface PostClient {
 
     @RequestLine("GET /r/{subreddit}/new.json")
-    @Headers({"Content-Type: application/json", "Authorization: Bearer {token}", "User-Agent: {userAgent}"})
+    @Headers({"Content-Type: application/json", "User-Agent: {userAgent}"})
     Envelope<Listing<Post>> getPosts(
             @Param("subreddit") String subreddit,
-            @Param("token") String token,
             @Param("userAgent") String userAgent,
             @QueryMap Map<String, Object> queryMap);
 

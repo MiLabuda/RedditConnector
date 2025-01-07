@@ -49,7 +49,6 @@ public class DependencyConfigurator {
         container.register(PostManager.class,
                 () -> new PostManager(
                         container.resolve(RedditSourceConfig.class),
-                        container.resolve(AuthManager.class),
                         container.resolve(PostClientFactory.class),
                         container.resolve(InitialFullScanState.class)
                 ));
@@ -62,7 +61,6 @@ public class DependencyConfigurator {
         container.register(CommentManager.class,
                 () -> new CommentManager(
                         container.resolve(RedditSourceConfig.class),
-                        container.resolve(AuthManager.class),
                         container.resolve(CommentClientFactory.class),
                         container.resolve(RedisApiCallsQueue.class),
                         container.resolve(SubmissionUpdateScheduler.class)

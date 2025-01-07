@@ -13,11 +13,10 @@ import java.util.Map;
 public interface CommentClient {
 
     @RequestLine("GET /r/{subreddit}/comments/{postId}.json")
-    @Headers({"Content-Type: application/json", "Authorization: Bearer {token}", "User-Agent: {userAgent}"})
+    @Headers({"Content-Type: application/json", "User-Agent: {userAgent}"})
     JsonNode getPostWithComments(
             @Param("subreddit") String subreddit,
             @Param("postId") String postId,
-            @Param("token") String token,
             @Param("userAgent") String userAgent,
             @QueryMap Map<String, Object> queryMap);
 }

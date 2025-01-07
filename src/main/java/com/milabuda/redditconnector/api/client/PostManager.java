@@ -19,13 +19,11 @@ public class PostManager {
     private static final Logger log = LoggerFactory.getLogger(PostManager.class);
 
     private final RedditSourceConfig config;
-    private final AuthManager authManager;
     private final PostClientFactory clientFactory;
     private final InitialFullScanState initialFullScanState;
 
-    public PostManager(RedditSourceConfig config, AuthManager authManager, PostClientFactory clientFactory, InitialFullScanState initialFullScanState) {
+    public PostManager(RedditSourceConfig config, PostClientFactory clientFactory, InitialFullScanState initialFullScanState) {
         this.config = config;
-        this.authManager = authManager;
         this.clientFactory = clientFactory;
         this.initialFullScanState = initialFullScanState;
     }
@@ -51,7 +49,7 @@ public class PostManager {
         int count = 0;
 
         while (true) {
-            Listing<Post> pageRecords = fetchPaginatedRecords( after, count);
+            Listing<Post> pageRecords = fetchPaginatedRecords(after, count);
 
             postsResponse.addAll(pageRecords.children().stream().map(Envelope::data).toList());
             if (pageRecords.after() == null) {
@@ -80,11 +78,10 @@ public class PostManager {
             PostClient client = clientFactory.getClient();
             return client.getPosts(
                     config.getSubreddit(),
-                    authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     queryParams);
         } catch (Exception e) {
-            log.error("Error occurred while fetching paginated posts: {}", e.getMessage());
+            log.error("Error occurred while fetching paginated posts", e);
             return null;
         }
     }
@@ -94,7 +91,6 @@ public class PostManager {
             PostClient client = clientFactory.getClient();
             Envelope<Listing<Post>> postsListingEnvelope = client.getPosts(
                     config.getSubreddit(),
-                    authManager.getRedditToken().accessToken(),
                     config.getUserAgent(),
                     null);
 
