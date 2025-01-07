@@ -19,4 +19,4 @@ docker push $IMAGE_NAME:latest
 docker compose down
 
 # Build and start the Docker containers
-docker compose up --build -d
+docker compose up --build --force-recreate -d
