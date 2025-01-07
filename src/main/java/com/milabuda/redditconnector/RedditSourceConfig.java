@@ -32,6 +32,10 @@ public class RedditSourceConfig extends AbstractConfig {
   private static final String INITIAL_FULL_SCAN_DOC = "Initial full scan of the subreddits. This will allow to fetch up to 1000 posts from subreddit first.";
   private static final boolean INITIAL_FULL_SCAN_DEFAULT = true;
 
+  public static final String POOLING_BATCH_SIZE_CONFIG = "reddit.pooling.batch.size";
+  private static final String POOLING_BATCH_SIZE_DOC = "Integer value for pooling batch size.";
+  private static final Integer POOLING_BATCH_SIZE_DEFAULT = 10;
+
   private static final String GRANT_TYPE = "client_credentials";
 
 
@@ -42,6 +46,7 @@ public class RedditSourceConfig extends AbstractConfig {
   public String getSubreddit() {return this.getString(SUBREDDIT_CONFIG);}
   public String getLastReadPost() {return this.getString(LAST_READ_POST_CONFIG);}
   public boolean getInitialFullScan() {return this.getBoolean(INITIAL_FULL_SCAN_CONFIG);}
+  public Integer getPoolingBatchSizeDefault() {return this.getInt(POOLING_BATCH_SIZE_CONFIG);}
   public String getGrantType() {return GRANT_TYPE;}
 
 
@@ -57,7 +62,8 @@ public class RedditSourceConfig extends AbstractConfig {
             .define(USER_AGENT_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USER_AGENT_DOC)
             .define(SUBREDDIT_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, SUBREDDIT_DOC)
             .define(LAST_READ_POST_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, LAST_READ_POST_DOC)
-            .define(INITIAL_FULL_SCAN_CONFIG, ConfigDef.Type.BOOLEAN, INITIAL_FULL_SCAN_DEFAULT, Importance.LOW, INITIAL_FULL_SCAN_DOC);
+            .define(INITIAL_FULL_SCAN_CONFIG, ConfigDef.Type.BOOLEAN, INITIAL_FULL_SCAN_DEFAULT, Importance.LOW, INITIAL_FULL_SCAN_DOC)
+            .define(POOLING_BATCH_SIZE_CONFIG, ConfigDef.Type.INT, POOLING_BATCH_SIZE_DEFAULT, Importance.LOW, POOLING_BATCH_SIZE_DOC);
   }
 
   RedditSourceConfig returnPropertiesWithDefaultsValuesIfMissing() {

@@ -26,7 +26,7 @@ public class PostTransformer{
             return postsResponse
                     .stream()
                     .sorted(Comparator.comparing(Post::createdUtc, Comparator.nullsFirst(Long::compareTo)))
-                    .filter(post -> redisPostCache.isPostNew(jedis, post))
+                    .filter(post -> eventType != EventType.CREATE || redisPostCache.isPostNew(jedis, post))
                     .peek(post -> redisPostCache.markPostAsProcessed(jedis, post))
                     .peek(post -> redisPostCache.updateLastUpdateTimestamp(jedis, post))
                     .map(post -> postRecordBuilder.buildSourceRecord(post, eventType))

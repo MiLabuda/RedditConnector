@@ -1,9 +1,9 @@
 package com.milabuda.redditconnector.api.client;
 
+import com.milabuda.redditconnector.RedditSourceConfig;
 import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
 import com.milabuda.redditconnector.redis.RedisManager;
 import com.milabuda.redditconnector.redis.RedisPostCache;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.resps.Tuple;
 
 import java.time.Duration;
@@ -12,30 +12,34 @@ import java.util.List;
 
 public class SubmissionUpdateScheduler {
 
-    private static final int QUEUE_BATCH_SIZE = 100;
+    private final RedisApiCallsQueue redisApiCallsQueue;
+    private final RedisPostCache redisPostCache;
+    private final RedditSourceConfig config;
 
-    private final RedisApiCallsQueue redisApiCallsQueue = new RedisApiCallsQueue();
-    private final RedisPostCache redisPostCache = new RedisPostCache();
-    private final Jedis jedis = RedisManager.getJedisResource();
 
-    public SubmissionUpdateScheduler() {
+    public SubmissionUpdateScheduler(RedisApiCallsQueue redisApiCallsQueue,
+                                     RedisPostCache redisPostCache,
+                                     RedditSourceConfig config) {
+        this.redisApiCallsQueue = redisApiCallsQueue;
+        this.redisPostCache = redisPostCache;
+        this.config = config;
     }
 
     public void schedulePostsForUpdate() {
         Instant currentTime = Instant.now();
-        List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(jedis);
+        List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(RedisManager.getJedisResource());
 
         int processed = 0;
         for (Tuple post : postsWithTimestamps) {
-            if (processed >= QUEUE_BATCH_SIZE) break;
+            if (processed >= config.getPoolingBatchSizeDefault()) break;
 
             String postId = post.getElement();
             Instant lastActivityTime = Instant.ofEpochMilli((long) post.getScore());
-            Instant lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(jedis, postId);
+            Instant lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(RedisManager.getJedisResource(), postId);
 
             if (shouldEnqueuePost(lastActivityTime, lastCheckedTimestamp, currentTime)) {
                 redisApiCallsQueue.enqueuePostForProcessing(postId);
-                redisPostCache.updateLastCheckedTimestamp(jedis, currentTime, postId);
+                redisPostCache.updateLastCheckedTimestamp(RedisManager.getJedisResource(), currentTime, postId);
                 processed++;
             }
         }
