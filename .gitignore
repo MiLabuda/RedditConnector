@@ -38,6 +38,6 @@ gen
 /kafka-data/*
 /redis-data/*
 /postgres-data/*
+/grafana-data/*
 /target/*
 dependency-reduced-pom.xml
-
