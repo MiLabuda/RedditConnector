@@ -13,8 +13,8 @@ import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Pair;
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.api.model.PostAndCommentData;
-import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
+import io.github.resilience4j.ratelimiter.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +31,18 @@ public class CommentManager {
     private final CommentClientFactory clientFactory;
     private final RedisApiCallsQueue redisApiCallsQueue;
     private final SubmissionUpdateScheduler submissionUpdateScheduler;
+    private final RateLimiterSingleton rateLimiterSingleton;
 
     public CommentManager(RedditSourceConfig config,
                           CommentClientFactory clientFactory,
                           RedisApiCallsQueue redisApiCallsQueue,
-                          SubmissionUpdateScheduler submissionUpdateScheduler) {
+                          SubmissionUpdateScheduler submissionUpdateScheduler,
+                          RateLimiterSingleton rateLimiterSingleton) {
         this.config = config;
         this.clientFactory = clientFactory;
         this.redisApiCallsQueue = redisApiCallsQueue;
         this.submissionUpdateScheduler = submissionUpdateScheduler;
+        this.rateLimiterSingleton = rateLimiterSingleton;
     }
 
     public Pair<List<Post>, List<Comment>> retrieveCommentsAndPostUpdates() {
@@ -90,11 +93,13 @@ public class CommentManager {
             CommentClient client = clientFactory.getClient();
             Map<String, Object> queryMap = new HashMap<>();
 
-            JsonNode root = client.getPostWithComments(
-                    config.getSubreddit(),
-                    postId,
-                    config.getUserAgent(),
-                    queryMap);
+            JsonNode root = RateLimiter.decorateSupplier(
+                    rateLimiterSingleton.getRateLimiter(),
+                    () -> client.getPostWithComments(
+                            config.getSubreddit(),
+                            postId,
+                            config.getUserAgent(),
+                            queryMap)).get();
 
             Envelope<Listing<Post>> post = mapJsonNode(root.get(0), new TypeReference<>() {});
             Envelope<Listing<Comment>> comments = mapJsonNode(root.get(1), new TypeReference<>() {});

@@ -4,6 +4,9 @@ import com.milabuda.redditconnector.RedditSourceConfig;
 import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
 import com.milabuda.redditconnector.redis.RedisManager;
 import com.milabuda.redditconnector.redis.RedisPostCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.resps.Tuple;
 
 import java.time.Duration;
@@ -11,6 +14,8 @@ import java.time.Instant;
 import java.util.List;
 
 public class SubmissionUpdateScheduler {
+
+    private static final Logger log = LoggerFactory.getLogger(SubmissionUpdateScheduler.class);
 
     private final RedisApiCallsQueue redisApiCallsQueue;
     private final RedisPostCache redisPostCache;
@@ -27,21 +32,25 @@ public class SubmissionUpdateScheduler {
 
     public void schedulePostsForUpdate() {
         Instant currentTime = Instant.now();
-        List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(RedisManager.getJedisResource());
+        try (Jedis jedis = RedisManager.getJedisResource()) {
+            List<Tuple> postsWithTimestamps = redisPostCache.getLastUpdateTimestamp(jedis);
 
-        int processed = 0;
-        for (Tuple post : postsWithTimestamps) {
-            if (processed >= config.getPoolingBatchSizeDefault()) break;
+            int processed = 0;
+            for (Tuple post : postsWithTimestamps) {
+                if (processed >= config.getPoolingBatchSizeDefault()) break;
 
-            String postId = post.getElement();
-            Instant lastActivityTime = Instant.ofEpochMilli((long) post.getScore());
-            Instant lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(RedisManager.getJedisResource(), postId);
+                String postId = post.getElement();
+                Instant lastActivityTime = Instant.ofEpochMilli((long) post.getScore());
+                Instant lastCheckedTimestamp = redisPostCache.getLastCheckedTimestamp(jedis, postId);
 
-            if (shouldEnqueuePost(lastActivityTime, lastCheckedTimestamp, currentTime)) {
-                redisApiCallsQueue.enqueuePostForProcessing(postId);
-                redisPostCache.updateLastCheckedTimestamp(RedisManager.getJedisResource(), currentTime, postId);
-                processed++;
+                if (shouldEnqueuePost(lastActivityTime, lastCheckedTimestamp, currentTime)) {
+                    redisApiCallsQueue.enqueuePostForProcessing(postId);
+                    redisPostCache.updateLastCheckedTimestamp(jedis, currentTime, postId);
+                    processed++;
+                }
             }
+        } catch (Exception e) {
+            log.debug("Error during Redis operation:", e);
         }
     }
 

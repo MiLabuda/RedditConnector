@@ -6,6 +6,7 @@ import com.milabuda.redditconnector.api.client.CommentManager;
 import com.milabuda.redditconnector.api.client.InitialFullScanState;
 import com.milabuda.redditconnector.api.client.PostClientFactory;
 import com.milabuda.redditconnector.api.client.PostManager;
+import com.milabuda.redditconnector.api.client.RateLimiterSingleton;
 import com.milabuda.redditconnector.api.client.SubmissionUpdateScheduler;
 import com.milabuda.redditconnector.api.oauth.AuthClient;
 import com.milabuda.redditconnector.api.oauth.AuthClientFactory;
@@ -13,7 +14,6 @@ import com.milabuda.redditconnector.api.oauth.AuthManager;
 import com.milabuda.redditconnector.api.oauth.InMemoryTokenStore;
 import com.milabuda.redditconnector.api.oauth.TokenStore;
 import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
-import com.milabuda.redditconnector.redis.RedisManager;
 import com.milabuda.redditconnector.redis.RedisPostCache;
 import com.milabuda.redditconnector.sourcerecord.transformer.CommentTransformer;
 import com.milabuda.redditconnector.sourcerecord.transformer.PostTransformer;
@@ -29,6 +29,7 @@ public class DependencyConfigurator {
         container.register(AuthClientFactory.class, AuthClientFactory::new);
         container.register(TokenStore.class, InMemoryTokenStore::new);
         container.register(InitialFullScanState.class, InitialFullScanState::getInstance);
+        container.register(RateLimiterSingleton.class, RateLimiterSingleton::getInstance);
         container.register(RedisApiCallsQueue.class, RedisApiCallsQueue::new);
         container.register(SubmissionUpdateScheduler.class,
                 () -> new SubmissionUpdateScheduler(
@@ -58,7 +59,8 @@ public class DependencyConfigurator {
                 () -> new PostManager(
                         container.resolve(RedditSourceConfig.class),
                         container.resolve(PostClientFactory.class),
-                        container.resolve(InitialFullScanState.class)
+                        container.resolve(InitialFullScanState.class),
+                        container.resolve(RateLimiterSingleton.class)
                 ));
 
         container.register(CommentClientFactory.class,
@@ -71,7 +73,8 @@ public class DependencyConfigurator {
                         container.resolve(RedditSourceConfig.class),
                         container.resolve(CommentClientFactory.class),
                         container.resolve(RedisApiCallsQueue.class),
-                        container.resolve(SubmissionUpdateScheduler.class)
+                        container.resolve(SubmissionUpdateScheduler.class),
+                        container.resolve(RateLimiterSingleton.class)
                 ));
 
         container.register(PostTransformer.class, PostTransformer::new);
