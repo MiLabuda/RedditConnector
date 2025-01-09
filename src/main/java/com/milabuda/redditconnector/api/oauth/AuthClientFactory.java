@@ -3,13 +3,13 @@ package com.milabuda.redditconnector.api.oauth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.api.client.CustomLogger;
 import feign.Feign;
 import feign.Logger.Level;
 import feign.Retryer;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.form.FormEncoder;
 import feign.jackson.JacksonDecoder;
+import feign.slf4j.Slf4jLogger;
 
 public class AuthClientFactory {
 
@@ -31,8 +31,8 @@ public class AuthClientFactory {
                             .retryer(Retryer.NEVER_RETRY)
                             .requestInterceptor(new BasicAuthRequestInterceptor(
                                     config.getClientId(), config.getClientSecret()))
-                            .logger(new CustomLogger())
-                            .logLevel(Level.FULL)
+                            .logger(new Slf4jLogger(AuthClientFactory.class))
+                            .logLevel(Level.HEADERS)
                             .target(AuthClient.class, config.getBaseUrl());
                 }
             }

@@ -10,6 +10,7 @@ import feign.Logger.Level;
 import feign.Retryer;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import feign.slf4j.Slf4jLogger;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,8 +53,8 @@ public class PostClientFactory {
                 .encoder(new JacksonEncoder())
                 .decoder(new JacksonDecoder(objectMapper))
                 .errorDecoder(new CustomErrorDecoder())
-                .logger(new CustomLogger())
-                .logLevel(Level.FULL)
+                .logger(new Slf4jLogger(PostClientFactory.class))
+                .logLevel(Level.HEADERS)
                 .retryer(new Retryer.Default(100, TimeUnit.SECONDS.toMillis(1), 3))
                 .requestInterceptor(new BearerAuthInterceptor(token.accessToken()))
                 .target(PostClient.class, "https://oauth.reddit.com");
