@@ -11,7 +11,12 @@ import java.util.Map;
 public class RedditSourceConfig extends AbstractConfig {
 
   public static final String BASE_URL_CONFIG = "reddit.base.url";
-  private static final String BASE_URL_DOC = "Reddit API base URL.";
+  private static final String BASE_URL_DOC = "Reddit base URL.";
+  private static final String BASE_URL_DEFAULT = "https://www.reddit.com";
+
+  public static final String API_BASE_URL_CONFIG = "reddit.api.base.url";
+  private static final String API_BASE_URL_DOC = "Reddit API base URL.";
+  private static final String API_BASE_URL_DEFAULT = "https://oauth.reddit.com";
 
   public static final String CLIENT_ID_CONFIG = "reddit.client.id";
   private static final String CLIENT_ID_DOC = "Reddit API Client ID.";
@@ -40,6 +45,7 @@ public class RedditSourceConfig extends AbstractConfig {
 
 
   public String getBaseUrl() {return this.getString(BASE_URL_CONFIG);}
+  public String getApiBaseUrl() {return this.getString(API_BASE_URL_CONFIG);}
   public String getClientId() {return this.getString(CLIENT_ID_CONFIG);}
   public String getClientSecret() {return this.getString(CLIENT_SECRET_CONFIG);}
   public String getUserAgent() {return this.getString(USER_AGENT_CONFIG);}
@@ -56,7 +62,8 @@ public class RedditSourceConfig extends AbstractConfig {
 
   public static ConfigDef config() {
     return new ConfigDef()
-            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, BASE_URL_DOC)
+            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, BASE_URL_DEFAULT, ConfigDef.Importance.HIGH, BASE_URL_DOC)
+            .define(API_BASE_URL_CONFIG, ConfigDef.Type.STRING, API_BASE_URL_DEFAULT, ConfigDef.Importance.HIGH, API_BASE_URL_DOC)
             .define(CLIENT_ID_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_ID_DOC)
             .define(CLIENT_SECRET_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_SECRET_DOC)
             .define(USER_AGENT_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USER_AGENT_DOC)
