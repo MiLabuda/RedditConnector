@@ -82,7 +82,7 @@ public class PostManager {
         queryParams.put("count", count);
 
         try {
-            PostClient client = clientFactory.getClient();
+            PostApiClient client = clientFactory.getClient();
             return RateLimiter.decorateSupplier(
                             rateLimiterSingleton.getRateLimiter(),
                             () -> client.getPosts(
@@ -98,7 +98,7 @@ public class PostManager {
 
     private List<Post> getPosts() {
         try {
-            PostClient client = clientFactory.getClient();
+            PostApiClient client = clientFactory.getClient();
             Supplier<Envelope<Listing<Post>>> postsListingEnvelope =
                     RateLimiter.decorateSupplier(
                             rateLimiterSingleton.getRateLimiter(),

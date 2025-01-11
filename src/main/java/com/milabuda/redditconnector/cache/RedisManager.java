@@ -1,4 +1,4 @@
-package com.milabuda.redditconnector.redis;
+package com.milabuda.redditconnector.cache;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

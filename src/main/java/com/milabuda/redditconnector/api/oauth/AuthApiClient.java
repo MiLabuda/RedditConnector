@@ -5,7 +5,7 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 
-public interface AuthClient {
+public interface AuthApiClient {
 
     @RequestLine("POST /api/v1/access_token")
     @Headers({"Content-Type: application/x-www-form-urlencoded", "User-Agent: {userAgent}"})

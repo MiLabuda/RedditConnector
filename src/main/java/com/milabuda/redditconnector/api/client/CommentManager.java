@@ -90,7 +90,7 @@ public class CommentManager {
 
     private PostAndCommentData getPostAndComments(String postId) {
         try {
-            CommentClient client = clientFactory.getClient();
+            CommentApiClient client = clientFactory.getClient();
             Map<String, Object> queryMap = new HashMap<>();
 
             JsonNode root = RateLimiter.decorateSupplier(

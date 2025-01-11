@@ -11,11 +11,11 @@ public class AuthManager {
 
     private static final Logger log = LoggerFactory.getLogger(AuthManager.class);
 
-    private final AuthClient httpClient;
+    private final AuthApiClient httpClient;
     private final RedditSourceConfig config;
     private final TokenStore tokenStore;
 
-    public AuthManager(RedditSourceConfig config, AuthClient httpClient, TokenStore tokenStore) {
+    public AuthManager(RedditSourceConfig config, AuthApiClient httpClient, TokenStore tokenStore) {
         this.config = config;
         this.httpClient = httpClient;
         this.tokenStore = tokenStore;

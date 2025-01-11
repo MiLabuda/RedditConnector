@@ -1,22 +1,22 @@
 package com.milabuda.redditconnector.api.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.milabuda.redditconnector.api.model.PostAndCommentData;
+import com.milabuda.redditconnector.api.model.Envelope;
+import com.milabuda.redditconnector.api.model.Listing;
+import com.milabuda.redditconnector.api.model.Post;
 import feign.Headers;
 import feign.Param;
 import feign.QueryMap;
 import feign.RequestLine;
 
-import java.util.List;
 import java.util.Map;
 
-public interface CommentClient {
+public interface PostApiClient {
 
-    @RequestLine("GET /r/{subreddit}/comments/{postId}.json")
+    @RequestLine("GET /r/{subreddit}/new.json")
     @Headers({"Content-Type: application/json", "User-Agent: {userAgent}"})
-    JsonNode getPostWithComments(
+    Envelope<Listing<Post>> getPosts(
             @Param("subreddit") String subreddit,
-            @Param("postId") String postId,
             @Param("userAgent") String userAgent,
             @QueryMap Map<String, Object> queryMap);
+
 }

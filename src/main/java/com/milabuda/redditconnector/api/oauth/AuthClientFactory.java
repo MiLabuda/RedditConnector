@@ -11,14 +11,15 @@ import feign.form.FormEncoder;
 import feign.jackson.JacksonDecoder;
 import feign.slf4j.Slf4jLogger;
 
+//I would like to align this with FeignClientFactoryProvider
 public class AuthClientFactory {
 
-    private static volatile AuthClient instance;
+    private static volatile AuthApiClient instance;
 
     public AuthClientFactory() {
     }
 
-    public static AuthClient getInstance(RedditSourceConfig config) {
+    public static AuthApiClient getInstance(RedditSourceConfig config) {
         if (instance == null) {
             synchronized (AuthClientFactory.class) {
                 if (instance == null) {
@@ -33,7 +34,7 @@ public class AuthClientFactory {
                                     config.getClientId(), config.getClientSecret()))
                             .logger(new Slf4jLogger(AuthClientFactory.class))
                             .logLevel(Level.HEADERS)
-                            .target(AuthClient.class, config.getBaseUrl());
+                            .target(AuthApiClient.class, config.getBaseUrl());
                 }
             }
         }
