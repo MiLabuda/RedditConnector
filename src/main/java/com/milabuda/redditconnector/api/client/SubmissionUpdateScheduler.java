@@ -1,9 +1,9 @@
 package com.milabuda.redditconnector.api.client;
 
 import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
-import com.milabuda.redditconnector.redis.RedisManager;
-import com.milabuda.redditconnector.redis.RedisPostCache;
+import com.milabuda.redditconnector.cache.RedisApiCallsQueue;
+import com.milabuda.redditconnector.cache.RedisManager;
+import com.milabuda.redditconnector.cache.RedisPostCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;

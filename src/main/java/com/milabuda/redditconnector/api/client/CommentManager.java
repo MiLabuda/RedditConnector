@@ -13,7 +13,7 @@ import com.milabuda.redditconnector.api.model.Listing;
 import com.milabuda.redditconnector.api.model.Pair;
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.api.model.PostAndCommentData;
-import com.milabuda.redditconnector.redis.RedisApiCallsQueue;
+import com.milabuda.redditconnector.cache.RedisApiCallsQueue;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.milabuda.redditconnector.redis;
+package com.milabuda.redditconnector.cache;
 
 import com.milabuda.redditconnector.api.model.Comment;
 import redis.clients.jedis.Jedis;
