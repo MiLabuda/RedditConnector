@@ -21,12 +21,12 @@ public class PostManager {
     private static final Logger log = LoggerFactory.getLogger(PostManager.class);
 
     private final RedditSourceConfig config;
-    private final PostClientFactory clientFactory;
+    private final FeignClientFactory<PostApiClient> clientFactory;
     private final InitialFullScanState initialFullScanState;
     private final RateLimiterSingleton rateLimiterSingleton;
 
     public PostManager(RedditSourceConfig config,
-                       PostClientFactory clientFactory,
+                       FeignClientFactory<PostApiClient> clientFactory,
                        InitialFullScanState initialFullScanState,
                        RateLimiterSingleton rateLimiterSingleton) {
         this.config = config;

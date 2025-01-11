@@ -28,13 +28,13 @@ public class CommentManager {
     private static final Logger log = LoggerFactory.getLogger(CommentManager.class);
 
     private final RedditSourceConfig config;
-    private final CommentClientFactory clientFactory;
+    private final FeignClientFactory<CommentApiClient> clientFactory;
     private final RedisApiCallsQueue redisApiCallsQueue;
     private final SubmissionUpdateScheduler submissionUpdateScheduler;
     private final RateLimiterSingleton rateLimiterSingleton;
 
     public CommentManager(RedditSourceConfig config,
-                          CommentClientFactory clientFactory,
+                          FeignClientFactory<CommentApiClient> clientFactory,
                           RedisApiCallsQueue redisApiCallsQueue,
                           SubmissionUpdateScheduler submissionUpdateScheduler,
                           RateLimiterSingleton rateLimiterSingleton) {
