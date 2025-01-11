@@ -1,10 +1,10 @@
-package com.milabuda.redditconnector.sourcerecord.transformer;
+package com.milabuda.redditconnector.recordconverter.transformer;
 
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.cache.RedisManager;
 import com.milabuda.redditconnector.cache.RedisPostCache;
-import com.milabuda.redditconnector.sourcerecord.builder.PostRecordBuilder;
-import com.milabuda.redditconnector.sourcerecord.schema.EventType;
+import com.milabuda.redditconnector.recordconverter.builder.PostRecordBuilder;
+import com.milabuda.redditconnector.recordconverter.schema.EventType;
 import org.apache.kafka.connect.source.SourceRecord;
 import redis.clients.jedis.Jedis;
 

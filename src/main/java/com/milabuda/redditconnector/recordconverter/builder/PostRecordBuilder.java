@@ -1,10 +1,8 @@
-package com.milabuda.redditconnector.sourcerecord.builder;
+package com.milabuda.redditconnector.recordconverter.builder;
 
-import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.api.model.Envelope;
 import com.milabuda.redditconnector.api.model.Post;
-import com.milabuda.redditconnector.sourcerecord.schema.EventType;
-import com.milabuda.redditconnector.sourcerecord.schema.PostSchema;
+import com.milabuda.redditconnector.recordconverter.schema.EventType;
+import com.milabuda.redditconnector.recordconverter.schema.PostSchema;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.header.ConnectHeaders;

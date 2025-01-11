@@ -2,7 +2,7 @@ package com.milabuda.redditconnector.util;
 
 
 import com.milabuda.redditconnector.RedditSourceConfig;
-import com.milabuda.redditconnector.api.client.CommentManager;
+import com.milabuda.redditconnector.api.client.CommentService;
 import com.milabuda.redditconnector.api.client.FeignClientFactoryProvider;
 import com.milabuda.redditconnector.api.client.InitialFullScanState;
 import com.milabuda.redditconnector.api.client.PostManager;
@@ -15,8 +15,8 @@ import com.milabuda.redditconnector.api.oauth.InMemoryTokenStore;
 import com.milabuda.redditconnector.api.oauth.TokenStore;
 import com.milabuda.redditconnector.cache.RedisApiCallsQueue;
 import com.milabuda.redditconnector.cache.RedisPostCache;
-import com.milabuda.redditconnector.sourcerecord.transformer.CommentTransformer;
-import com.milabuda.redditconnector.sourcerecord.transformer.PostTransformer;
+import com.milabuda.redditconnector.recordconverter.transformer.CommentTransformer;
+import com.milabuda.redditconnector.recordconverter.transformer.PostTransformer;
 
 import java.util.Map;
 
@@ -61,8 +61,8 @@ public class DependencyConfigurator {
                         container.resolve(RateLimiterSingleton.class)
                 ));
 
-        container.register(CommentManager.class,
-                () -> new CommentManager(
+        container.register(CommentService.class,
+                () -> new CommentService(
                         container.resolve(RedditSourceConfig.class),
                         container.resolve(FeignClientFactoryProvider.class).getCommentClientFactory(),
                         container.resolve(RedisApiCallsQueue.class),

@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CommentManager {
-    private static final Logger log = LoggerFactory.getLogger(CommentManager.class);
+public class CommentService {
+    private static final Logger log = LoggerFactory.getLogger(CommentService.class);
 
     private final RedditSourceConfig config;
     private final FeignClientFactory<CommentApiClient> clientFactory;
@@ -33,7 +33,7 @@ public class CommentManager {
     private final SubmissionUpdateScheduler submissionUpdateScheduler;
     private final RateLimiterSingleton rateLimiterSingleton;
 
-    public CommentManager(RedditSourceConfig config,
+    public CommentService(RedditSourceConfig config,
                           FeignClientFactory<CommentApiClient> clientFactory,
                           RedisApiCallsQueue redisApiCallsQueue,
                           SubmissionUpdateScheduler submissionUpdateScheduler,

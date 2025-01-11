@@ -1,8 +1,8 @@
-package com.milabuda.redditconnector.sourcerecord.builder;
+package com.milabuda.redditconnector.recordconverter.builder;
 
 import com.milabuda.redditconnector.api.model.Comment;
-import com.milabuda.redditconnector.sourcerecord.schema.CommentSchema;
-import com.milabuda.redditconnector.sourcerecord.schema.EventType;
+import com.milabuda.redditconnector.recordconverter.schema.CommentSchema;
+import com.milabuda.redditconnector.recordconverter.schema.EventType;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.header.ConnectHeaders;

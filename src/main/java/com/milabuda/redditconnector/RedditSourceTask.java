@@ -1,14 +1,14 @@
 package com.milabuda.redditconnector;
 
-import com.milabuda.redditconnector.api.client.CommentManager;
+import com.milabuda.redditconnector.api.client.CommentService;
 import com.milabuda.redditconnector.api.client.PostManager;
 import com.milabuda.redditconnector.api.model.Comment;
 import com.milabuda.redditconnector.api.model.Pair;
 import com.milabuda.redditconnector.api.model.Post;
 import com.milabuda.redditconnector.cache.RedisManager;
-import com.milabuda.redditconnector.sourcerecord.schema.EventType;
-import com.milabuda.redditconnector.sourcerecord.transformer.CommentTransformer;
-import com.milabuda.redditconnector.sourcerecord.transformer.PostTransformer;
+import com.milabuda.redditconnector.recordconverter.schema.EventType;
+import com.milabuda.redditconnector.recordconverter.transformer.CommentTransformer;
+import com.milabuda.redditconnector.recordconverter.transformer.PostTransformer;
 import com.milabuda.redditconnector.util.DependencyConfigurator;
 import com.milabuda.redditconnector.util.SimpleDIContainer;
 import com.milabuda.redditconnector.util.VersionUtil;
@@ -28,7 +28,7 @@ public class RedditSourceTask extends SourceTask {
   private final SimpleDIContainer container = new SimpleDIContainer();
   private PostManager postManager;
   private PostTransformer postTransformer;
-  private CommentManager commentManager;
+  private CommentService commentService;
   private CommentTransformer commentTransformer;
 
   @Override
@@ -43,7 +43,7 @@ public class RedditSourceTask extends SourceTask {
     DependencyConfigurator.configure(container, props);
 
     postManager = container.resolve(PostManager.class);
-    commentManager = container.resolve(CommentManager.class);
+    commentService = container.resolve(CommentService.class);
     postTransformer = container.resolve(PostTransformer.class);
     commentTransformer = container.resolve(CommentTransformer.class);
   }
@@ -67,7 +67,7 @@ public class RedditSourceTask extends SourceTask {
   }
 
   List<SourceRecord> getRedditSubmissionsAsSourceRecords() {
-    Pair<List<Post>, List<Comment>> commentsAndPostsResponse = commentManager.retrieveCommentsAndPostUpdates();
+    Pair<List<Post>, List<Comment>> commentsAndPostsResponse = commentService.retrieveCommentsAndPostUpdates();
     List<Post> posts = commentsAndPostsResponse.left();
     List<Comment> comments = commentsAndPostsResponse.right();
 

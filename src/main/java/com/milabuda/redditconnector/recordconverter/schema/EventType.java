@@ -1,4 +1,4 @@
-package com.milabuda.redditconnector.sourcerecord.schema;
+package com.milabuda.redditconnector.recordconverter.schema;
 
 public enum EventType {
     CREATE,

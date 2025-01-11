@@ -1,4 +1,4 @@
-package com.milabuda.redditconnector.sourcerecord.schema;
+package com.milabuda.redditconnector.recordconverter.schema;
 
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;

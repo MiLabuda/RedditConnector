@@ -1,9 +1,9 @@
-package com.milabuda.redditconnector.sourcerecord.transformer;
+package com.milabuda.redditconnector.recordconverter.transformer;
 
 import com.milabuda.redditconnector.api.model.Comment;
 import com.milabuda.redditconnector.cache.RedisCommentCache;
 import com.milabuda.redditconnector.cache.RedisManager;
-import com.milabuda.redditconnector.sourcerecord.builder.CommentRecordBuilder;
+import com.milabuda.redditconnector.recordconverter.builder.CommentRecordBuilder;
 import org.apache.kafka.connect.source.SourceRecord;
 import redis.clients.jedis.Jedis;
 

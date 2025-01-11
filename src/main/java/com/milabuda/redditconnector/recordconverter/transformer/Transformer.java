@@ -1,6 +1,6 @@
-package com.milabuda.redditconnector.sourcerecord.transformer;
+package com.milabuda.redditconnector.recordconverter.transformer;
 
-import com.milabuda.redditconnector.sourcerecord.schema.EventType;
+import com.milabuda.redditconnector.recordconverter.schema.EventType;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
