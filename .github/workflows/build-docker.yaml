@@ -1,0 +1,26 @@
+name: Build and Publish Image to Docker Hub
+on:
+  push:
+    branches:
+      - master
+jobs:
+  publish-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Docker Image Tag from Git Tag
+        id: set_tag
+        run: echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      - name: Build and Tag Docker Image
+        run: |
+          docker build -t milabuda544/kafka-reddit-connector:${{ env.TAG }} .
+          docker tag milabuda544/kafka-reddit-connector:${{ env.TAG }} milabuda544/kafka-reddit-connector:latest
+
+      - name: Push Image to Docker Hub
+        run: |
+          docker login -u milabuda544 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker push milabuda544/kafka-reddit-connector:${{ env.TAG }}
+          docker push milabuda544/kafka-reddit-connector:latest
