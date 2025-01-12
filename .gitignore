@@ -41,3 +41,5 @@ gen
 /grafana-data/*
 /target/*
 dependency-reduced-pom.xml
+!/src/main/resources/connect-log4j.properties
+!/src/main/resources/application.properties

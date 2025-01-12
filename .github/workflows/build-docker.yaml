@@ -12,9 +12,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prepare directories if not exist
+        run: |
+          # Check if config directory exists, if not create it
+          [ ! -d "config" ] && mkdir -p config
+
+          # Check if kafka-data/offsets exists, if not create it
+          [ ! -d "kafka-data" ] && mkdir -p kafka-data
+          [ ! -f "kafka-data/offsets" ] && touch kafka-data/offsets
+
       - name: Set Docker Image Tag from Git Tag
         id: set_tag
         run: echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      - name: Set Up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build JAR using Maven
+        run: mvn clean package -DskipTests
 
       - name: Build and Tag Docker Image
         run: |
@@ -23,6 +41,6 @@ jobs:
 
       - name: Push Image to Docker Hub
         run: |
-          docker login -u milabuda544 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u milabuda544 --password-stdin
           docker push milabuda544/kafka-reddit-connector:${{ env.TAG }}
           docker push milabuda544/kafka-reddit-connector:latest
